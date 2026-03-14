@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user profile information, exam preferences, and study goals.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "exam": { "type": "string", "description": "SSC, UPSC, Railway, Banking, GATE, State" },
+        "subjects": { "type": "array", "items": { "type": "string" } },
+        "studyHoursStart": { "type": "string" },
+        "studyHoursEnd": { "type": "string" },
+        "dailyTarget": { "type": "number" },
+        "language": { "type": "string" },
+        "city": { "type": "string" },
+        "streak": { "type": "number" },
+        "totalStudyHours": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "exam"]
+    },
+    "matches": {
+      "title": "Match",
+      "description": "Stores swipe matches between two users.",
+      "type": "object",
+      "properties": {
+        "users": { "type": "array", "items": { "type": "string" }, "description": "Array of two user UIDs" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "initiator": { "type": "string" }
+      }
+    },
+    "messages": {
+      "title": "Message",
+      "description": "Chat messages between matched partners.",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "studySessions": {
+      "title": "Study Session",
+      "description": "Logs of study sessions for tracking progress.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "duration": { "type": "number", "description": "Duration in minutes" },
+        "date": { "type": "string", "format": "date" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "users",
+      "description": "User profile documents"
+    },
+    "matches/{matchId}": {
+      "schema": "matches",
+      "description": "Match documents"
+    },
+    "matches/{matchId}/messages/{messageId}": {
+      "schema": "messages",
+      "description": "Messages within a match"
+    },
+    "studySessions/{sessionId}": {
+      "schema": "studySessions",
+      "description": "Study session logs"
+    }
+  }
+}
