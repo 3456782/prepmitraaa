@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
   Timer, 
@@ -9,10 +9,13 @@ import {
   Search, 
   MessageSquare,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Play,
+  X
 } from 'lucide-react';
 
 export default function Landing() {
+  const [showDemo, setShowDemo] = useState(false);
   const features = [
     { icon: Brain, title: 'Smart AI Matching', desc: 'Find partners based on exam, subjects, and study style.' },
     { icon: Search, title: 'Partner Swipe', desc: 'Tinder-style interface to quickly find your study tribe.' },
@@ -59,8 +62,11 @@ export default function Landing() {
                   Start Studying Together <ArrowRight size={20} />
                 </span>
               </Link>
-              <button className="px-8 py-4 bg-zinc-900 text-zinc-300 font-bold rounded-2xl border border-white/5 hover:bg-zinc-800 transition-all">
-                Watch Demo
+              <button 
+                onClick={() => setShowDemo(true)}
+                className="px-8 py-4 bg-zinc-900 text-zinc-300 font-bold rounded-2xl border border-white/5 hover:bg-zinc-800 transition-all flex items-center gap-2"
+              >
+                <Play size={20} fill="currentColor" /> Watch Demo
               </button>
             </div>
           </motion.div>
@@ -135,6 +141,59 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Demo Modal */}
+      <AnimatePresence>
+        {showDemo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/90 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative w-full max-w-4xl aspect-video bg-zinc-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+            >
+              <button 
+                onClick={() => setShowDemo(false)}
+                className="absolute top-6 right-6 z-10 p-2 bg-zinc-950/50 text-white rounded-full hover:bg-zinc-800 transition-all"
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
+                <div className="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center text-indigo-400 mb-6">
+                  <Play size={40} fill="currentColor" />
+                </div>
+                <h3 className="text-3xl font-black mb-4">PrepMitra Walkthrough</h3>
+                <p className="text-zinc-400 max-w-md mb-8">
+                  Experience how PrepMitra helps you find the perfect study partner and stay consistent with your goals.
+                </p>
+                <div className="w-full max-w-2xl h-64 bg-zinc-950 rounded-2xl border border-white/5 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
+                  <img 
+                    src="https://picsum.photos/seed/app-demo/1200/800" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale"
+                    alt="Demo Placeholder"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="relative z-10 flex flex-col items-center gap-4">
+                    <div className="flex gap-2">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                    <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Demo Video Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

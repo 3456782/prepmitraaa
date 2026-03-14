@@ -56,6 +56,11 @@ export default function SwipeCard({ profile, onSwipe }: SwipeCardProps) {
             <span className="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/20">
               {profile.exam}
             </span>
+            {(profile as any).matchScore !== undefined && (
+              <span className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">
+                {Math.min(100, (profile as any).matchScore)}% Match
+              </span>
+            )}
             <span className="bg-zinc-800 text-zinc-300 px-3 py-1 rounded-full text-xs font-bold">
               {profile.language}
             </span>

@@ -30,8 +30,43 @@ export default function Swipe() {
       
       const snapshot = await getDocs(q);
       const fetchedProfiles = snapshot.docs.map(doc => doc.data() as UserProfile);
-      setProfiles(fetchedProfiles);
+      
+      // Enhanced Matching Algorithm
+      const scoredProfiles = fetchedProfiles.map(profile => {
+        let score = 0;
+        
+        // 1. Language Match (High Priority)
+        if (profile.language === myData.language) score += 50;
+        
+        // 2. Study Time Overlap (Medium Priority)
+        const myStart = timeToMinutes(myData.studyHoursStart);
+        const myEnd = timeToMinutes(myData.studyHoursEnd);
+        const pStart = timeToMinutes(profile.studyHoursStart);
+        const pEnd = timeToMinutes(profile.studyHoursEnd);
+        
+        const overlapStart = Math.max(myStart, pStart);
+        const overlapEnd = Math.min(myEnd, pEnd);
+        const overlapMinutes = Math.max(0, overlapEnd - overlapStart);
+        
+        score += Math.floor(overlapMinutes / 30) * 5; // 5 points for every 30 mins overlap
+        
+        // 3. Daily Target Similarity (Low Priority)
+        const targetDiff = Math.abs(profile.dailyTarget - myData.dailyTarget);
+        if (targetDiff <= 2) score += 10;
+        
+        return { ...profile, matchScore: score };
+      });
+
+      // Sort by score descending
+      const sortedProfiles = scoredProfiles.sort((a, b) => (b as any).matchScore - (a as any).matchScore);
+      
+      setProfiles(sortedProfiles);
       setLoading(false);
+    };
+
+    const timeToMinutes = (time: string) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
     };
 
     fetchProfiles();

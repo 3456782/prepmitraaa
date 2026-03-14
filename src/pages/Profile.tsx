@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
@@ -12,7 +12,8 @@ import {
   MapPin,
   Camera,
   LogOut,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { signOut } from 'firebase/auth';
@@ -21,6 +22,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,6 +37,43 @@ export default function Profile() {
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/');
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !auth.currentUser) return;
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file.');
+      return;
+    }
+
+    if (file.size > 500000) { // 500KB limit for base64 storage in Firestore
+      alert('Image is too large. Please choose an image under 500KB.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        await updateDoc(doc(db, 'users', auth.currentUser!.uid), {
+          photoURL: base64String
+        });
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+      setIsUploading(false);
+    }
   };
 
   if (!profile) return null;
@@ -55,14 +95,32 @@ export default function Profile() {
         <div className="md:col-span-1 space-y-6">
           <div className="glass-card p-8 text-center relative group">
             <div className="relative inline-block mb-6">
-              <img 
-                src={profile.photoURL || `https://picsum.photos/seed/${profile.uid}/200/200`} 
-                className="w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white/5 shadow-2xl"
-                alt=""
-              />
-              <button className="absolute bottom-0 right-0 p-3 bg-indigo-600 text-white rounded-2xl shadow-lg hover:scale-110 transition-transform">
+              <div className="relative">
+                <img 
+                  src={profile.photoURL || `https://picsum.photos/seed/${profile.uid}/200/200`} 
+                  className={`w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white/5 shadow-2xl transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`}
+                  alt=""
+                />
+                {isUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                  </div>
+                )}
+              </div>
+              <button 
+                onClick={handleImageClick}
+                disabled={isUploading}
+                className="absolute bottom-0 right-0 p-3 bg-indigo-600 text-white rounded-2xl shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+              >
                 <Camera size={18} />
               </button>
+              <input 
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
             <h2 className="text-2xl font-black mb-1">{profile.name}</h2>
             <p className="text-zinc-500 font-medium text-sm mb-6">{profile.email}</p>
