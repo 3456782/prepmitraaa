@@ -132,9 +132,9 @@ export default function Landing() {
             <span className="text-xl font-black tracking-tighter">PrepMitra</span>
           </div>
           <div className="flex gap-8 text-sm text-zinc-500 font-medium">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <a href="mailto:mk9648940@gmail.com" className="hover:text-white transition-colors">Contact</a>
           </div>
           <div className="text-sm text-zinc-600">
             © 2026 PrepMitra. All rights reserved.

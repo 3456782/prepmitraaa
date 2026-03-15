@@ -13,6 +13,8 @@ import Swipe from './pages/Swipe';
 import Chats from './pages/Chats';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -75,6 +77,8 @@ export default function App() {
               path="/profile" 
               element={user ? (hasProfile ? <Profile /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
             />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </Layout>
       </NotificationProvider>
