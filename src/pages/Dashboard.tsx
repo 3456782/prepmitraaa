@@ -29,13 +29,23 @@ import PomodoroTimer from '../components/PomodoroTimer';
 export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [sessions, setSessions] = useState<StudySession[]>([]);
+  const [partnersCount, setPartnersCount] = useState(0);
+  const [todayHours, setTodayHours] = useState(0);
+  const [goalProgress, setGoalProgress] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!auth.currentUser) return;
 
     const unsubProfile = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
-      setProfile(doc.data() as UserProfile);
+      const profileData = doc.data() as UserProfile;
+      setProfile(profileData);
+      
+      if (profileData) {
+        const monthlyTarget = profileData.dailyTarget * 30;
+        const progress = Math.min(100, Math.round((profileData.totalStudyHours / monthlyTarget) * 100));
+        setGoalProgress(progress);
+      }
     });
 
     const q = query(
@@ -45,24 +55,58 @@ export default function Dashboard() {
     const unsubSessions = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudySession));
       setSessions(data);
+      
+    const today = new Date().toISOString().split('T')[0];
+    const todaySessions = data.filter(s => s.timestamp?.toDate().toISOString().split('T')[0] === today);
+      const totalTodaySeconds = todaySessions.reduce((acc, s) => acc + s.duration, 0);
+      setTodayHours(Number((totalTodaySeconds / 3600).toFixed(1)));
+      
       setLoading(false);
+    });
+
+    const qPartners = query(
+      collection(db, 'matches'),
+      where('users', 'array-contains', auth.currentUser.uid),
+      where('status', '==', 'accepted')
+    );
+    const unsubPartners = onSnapshot(qPartners, (snapshot) => {
+      setPartnersCount(snapshot.size);
     });
 
     return () => {
       unsubProfile();
       unsubSessions();
+      unsubPartners();
     };
   }, []);
 
-  const chartData = [
-    { name: 'Mon', hours: 4 },
-    { name: 'Tue', hours: 6 },
-    { name: 'Wed', hours: 3 },
-    { name: 'Thu', hours: 8 },
-    { name: 'Fri', hours: 5 },
-    { name: 'Sat', hours: 7 },
-    { name: 'Sun', hours: 2 },
-  ];
+  // Calculate real chart data from sessions
+  const getChartData = () => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const now = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(now.getDate() - (6 - i));
+      return {
+        name: days[d.getDay()],
+        date: d.toISOString().split('T')[0],
+        hours: 0
+      };
+    });
+
+    sessions.forEach(session => {
+      if (!session.timestamp) return;
+      const sessionDate = session.timestamp.toDate().toISOString().split('T')[0];
+      const dayData = last7Days.find(d => d.date === sessionDate);
+      if (dayData) {
+        dayData.hours += session.duration / 3600; // convert seconds to hours
+      }
+    });
+
+    return last7Days.map(({ name, hours }) => ({ name, hours: Number(hours.toFixed(1)) }));
+  };
+
+  const chartData = getChartData();
 
   if (loading) return null;
 
@@ -101,7 +145,7 @@ export default function Dashboard() {
               <TrendingUp size={24} />
             </div>
             <div>
-              <div className="text-4xl font-black mb-1">{Math.round((profile?.totalStudyHours || 0) / (profile?.dailyTarget || 1) * 100)}%</div>
+              <div className="text-4xl font-black mb-1">{goalProgress}%</div>
               <div className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Goal Progress</div>
             </div>
           </div>
@@ -110,7 +154,7 @@ export default function Dashboard() {
               <Users size={24} />
             </div>
             <div>
-              <div className="text-4xl font-black mb-1">12</div>
+              <div className="text-4xl font-black mb-1">{partnersCount}</div>
               <div className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Study Partners</div>
             </div>
           </div>
@@ -165,7 +209,9 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-sm text-zinc-300 leading-relaxed mb-6 italic">
-              "You've studied for 4 hours today. That's 20% more than your average! Keep going, you're doing great."
+              "{profile?.totalStudyHours && profile.totalStudyHours > 0 
+                ? `You've studied for ${profile.totalStudyHours} hours in total. You're ${Math.round((profile.totalStudyHours / (profile.dailyTarget * 30)) * 100)}% through your monthly goal!`
+                : "You haven't started any study sessions yet. Let's get focused and start your first session today!"}"
             </p>
             <button className="w-full py-3 bg-indigo-500 text-white font-bold rounded-xl text-sm hover:bg-indigo-400 transition-all">
               Ask for Tips

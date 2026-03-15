@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import SwipeCard from '../components/SwipeCard';
+import MatchOverlay from '../components/MatchOverlay';
 import { UserProfile } from '../types';
 import { Search, Heart, X } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export default function Swipe() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
+  const [matchedPartner, setMatchedPartner] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -75,15 +77,34 @@ export default function Swipe() {
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (direction === 'right' && auth.currentUser && profiles[currentIndex]) {
       const targetUser = profiles[currentIndex];
+      const myUid = auth.currentUser.uid;
+      const targetUid = targetUser.uid;
+      const matchId = [myUid, targetUid].sort().join('_');
       
-      // Create a match request
-      await addDoc(collection(db, 'matches'), {
-        users: [auth.currentUser.uid, targetUser.uid].sort(),
-        status: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        initiator: auth.currentUser.uid,
-      });
+      const matchRef = doc(db, 'matches', matchId);
+      const matchDoc = await getDoc(matchRef);
+
+      if (matchDoc.exists()) {
+        const data = matchDoc.data();
+        if (data.initiator !== myUid && data.status === 'pending') {
+          // Mutual match!
+          await updateDoc(matchRef, {
+            status: 'accepted',
+            updatedAt: serverTimestamp()
+          });
+          setMatchedPartner(targetUser);
+        }
+      } else {
+        // First time liking
+        await setDoc(matchRef, {
+          id: matchId,
+          users: [myUid, targetUid].sort(),
+          status: 'pending',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          initiator: myUid,
+        });
+      }
     }
     
     setCurrentIndex(prev => prev + 1);
@@ -113,6 +134,13 @@ export default function Swipe() {
   return (
     <div className="relative h-[70vh] w-full max-w-md mx-auto">
       <AnimatePresence>
+        {matchedPartner && myProfile && (
+          <MatchOverlay 
+            myProfile={myProfile}
+            partnerProfile={matchedPartner}
+            onClose={() => setMatchedPartner(null)}
+          />
+        )}
         {profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, i) => (
           <SwipeCard 
             key={profile.uid} 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, collection, query, where } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { 
   User, 
@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [partnersCount, setPartnersCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +32,20 @@ export default function Profile() {
     const unsub = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
       setProfile(doc.data() as UserProfile);
     });
-    return () => unsub();
+
+    const qPartners = query(
+      collection(db, 'matches'),
+      where('users', 'array-contains', auth.currentUser.uid),
+      where('status', '==', 'accepted')
+    );
+    const unsubPartners = onSnapshot(qPartners, (snapshot) => {
+      setPartnersCount(snapshot.size);
+    });
+
+    return () => {
+      unsub();
+      unsubPartners();
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -140,6 +154,10 @@ export default function Profile() {
 
           <div className="glass-card p-6 space-y-4">
             <h4 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Quick Stats</h4>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-zinc-400">Study Partners</span>
+              <span className="text-sm font-bold text-indigo-400">{partnersCount}</span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-400">Daily Goal</span>
               <span className="text-sm font-bold text-indigo-400">{profile.dailyTarget}h</span>

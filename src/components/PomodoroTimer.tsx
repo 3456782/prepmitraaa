@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Coffee, Brain } from 'lucide-react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 
 export default function PomodoroTimer() {
   const [minutes, setMinutes] = useState(25);
@@ -33,11 +33,17 @@ export default function PomodoroTimer() {
     if (!isBreak) {
       // Log study session
       if (auth.currentUser) {
+        const durationSeconds = 25 * 60;
         await addDoc(collection(db, 'studySessions'), {
           userId: auth.currentUser.uid,
-          duration: 25,
+          duration: durationSeconds,
           date: new Date().toISOString().split('T')[0],
           timestamp: serverTimestamp(),
+        });
+        
+        // Update user's total study hours
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          totalStudyHours: increment(25 / 60) // increment by hours
         });
       }
       alert('Focus session complete! Take a break.');
