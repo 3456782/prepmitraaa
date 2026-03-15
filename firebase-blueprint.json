@@ -55,6 +55,31 @@
         "date": { "type": "string", "format": "date" },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "topics": {
+      "title": "Topic",
+      "description": "Study topics tracked by the user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "subject": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "practiceTests": {
+      "title": "Practice Test",
+      "description": "Practice test scores logged by the user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "score": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "date": { "type": "string", "format": "date" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -73,6 +98,14 @@
     "studySessions/{sessionId}": {
       "schema": "studySessions",
       "description": "Study session logs"
+    },
+    "topics/{topicId}": {
+      "schema": "topics",
+      "description": "Study topics"
+    },
+    "practiceTests/{testId}": {
+      "schema": "practiceTests",
+      "description": "Practice test scores"
     }
   }
 }

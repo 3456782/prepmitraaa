@@ -39,3 +39,22 @@ export interface StudySession {
   date: string;
   timestamp: any;
 }
+
+export interface Topic {
+  id: string;
+  userId: string;
+  name: string;
+  subject: string;
+  completed: boolean;
+  createdAt: any;
+}
+
+export interface PracticeTest {
+  id: string;
+  userId: string;
+  title: string;
+  score: number;
+  totalMarks: number;
+  date: string;
+  timestamp: any;
+}

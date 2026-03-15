@@ -9,7 +9,8 @@ import {
   Trophy, 
   User, 
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  TrendingUp
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -29,6 +30,7 @@ export default function Navbar() {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/swipe', icon: Search, label: 'Match' },
     { path: '/chats', icon: MessageSquare, label: 'Chats' },
+    { path: '/progress', icon: TrendingUp, label: 'Progress' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranks' },
     { path: '/profile', icon: User, label: 'Profile' },
   ];

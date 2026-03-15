@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import Swipe from './pages/Swipe';
 import Chats from './pages/Chats';
 import Profile from './pages/Profile';
+import Progress from './pages/Progress';
 import Leaderboard from './pages/Leaderboard';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -76,6 +77,10 @@ export default function App() {
             <Route 
               path="/profile" 
               element={user ? (hasProfile ? <Profile /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/progress" 
+              element={user ? (hasProfile ? <Progress /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
             />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
