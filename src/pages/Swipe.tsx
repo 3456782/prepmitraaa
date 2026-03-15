@@ -23,6 +23,14 @@ export default function Swipe() {
       const myData = myDoc.data() as UserProfile;
       setMyProfile(myData);
 
+      // Fetch my matches to filter out already swiped users
+      const matchesQuery = query(
+        collection(db, 'matches'),
+        where('users', 'array-contains', auth.currentUser.uid)
+      );
+      const matchesSnapshot = await getDocs(matchesQuery);
+      const swipedUserIds = matchesSnapshot.docs.flatMap(d => d.data().users).filter(id => id !== auth.currentUser?.uid);
+
       // Fetch other users with same exam
       const q = query(
         collection(db, 'users'),
@@ -31,7 +39,9 @@ export default function Swipe() {
       );
       
       const snapshot = await getDocs(q);
-      const fetchedProfiles = snapshot.docs.map(doc => doc.data() as UserProfile);
+      const fetchedProfiles = snapshot.docs
+        .map(doc => doc.data() as UserProfile)
+        .filter(profile => !swipedUserIds.includes(profile.uid));
       
       // Enhanced Matching Algorithm
       const scoredProfiles = fetchedProfiles.map(profile => {
@@ -93,6 +103,16 @@ export default function Swipe() {
             updatedAt: serverTimestamp()
           });
           setMatchedPartner(targetUser);
+
+          // Notify the other user that they matched
+          await addDoc(collection(db, 'notifications'), {
+            userId: targetUid,
+            title: 'New Match!',
+            message: `${myProfile?.name || 'Someone'} accepted your study request! Start chatting now.`,
+            type: 'match',
+            read: false,
+            createdAt: serverTimestamp()
+          });
         }
       } else {
         // First time liking
@@ -103,6 +123,16 @@ export default function Swipe() {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           initiator: myUid,
+        });
+
+        // Send notification to target user
+        await addDoc(collection(db, 'notifications'), {
+          userId: targetUid,
+          title: 'Study Request',
+          message: `${myProfile?.name || 'Someone'} wants to be your study partner!`,
+          type: 'match',
+          read: false,
+          createdAt: serverTimestamp()
         });
       }
     }
