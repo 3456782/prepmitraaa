@@ -41,11 +41,11 @@ export default function Landing() {
             transition={{ duration: 0.8 }}
           >
             <span className="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wider text-indigo-400 uppercase bg-indigo-400/10 rounded-full border border-indigo-400/20">
-              The Future of Exam Prep
+              PrepMitra: The Future of Exam Prep
             </span>
             <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-tight">
-              Find Your Perfect <br />
-              <span className="gradient-text">Study Partner</span>
+              Master Your Exams with <br />
+              <span className="gradient-text">PrepMitra</span>
             </h1>
             <p className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed">
               Stay consistent, stay accountable, and crack your exam with the right partner. 
