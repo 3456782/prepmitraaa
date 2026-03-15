@@ -93,6 +93,19 @@
         "date": { "type": "string", "format": "date" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "notifications": {
+      "title": "Notification",
+      "description": "In-app notifications for the user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["streak_reset", "match", "message", "system"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -123,6 +136,10 @@
     "todoItems/{todoId}": {
       "schema": "todoItems",
       "description": "User to-do items"
+    },
+    "notifications/{notificationId}": {
+      "schema": "notifications",
+      "description": "User notifications"
     }
   }
 }

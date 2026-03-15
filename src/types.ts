@@ -68,3 +68,13 @@ export interface TodoItem {
   date: string;
   createdAt: any;
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'streak_reset' | 'match' | 'message' | 'system';
+  read: boolean;
+  createdAt: any;
+}

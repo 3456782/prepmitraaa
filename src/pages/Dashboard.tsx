@@ -62,6 +62,16 @@ export default function Dashboard() {
             await updateDoc(doc(db, 'users', auth.currentUser.uid), {
               streak: 0
             });
+
+            // Create notification
+            await addDoc(collection(db, 'notifications'), {
+              userId: auth.currentUser.uid,
+              title: 'Streak Reset',
+              message: "You missed a day! Don't worry, every day is a new chance to start fresh. Let's get back to it!",
+              type: 'streak_reset',
+              read: false,
+              createdAt: serverTimestamp()
+            });
           }
         }
       }
