@@ -18,6 +18,7 @@
         "city": { "type": "string" },
         "streak": { "type": "number" },
         "totalStudyHours": { "type": "number" },
+        "lastStudyDate": { "type": "string", "format": "date" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email", "exam"]

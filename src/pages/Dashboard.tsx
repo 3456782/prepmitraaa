@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { 
   Timer, 
@@ -37,14 +37,32 @@ export default function Dashboard() {
   useEffect(() => {
     if (!auth.currentUser) return;
 
-    const unsubProfile = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
-      const profileData = doc.data() as UserProfile;
+    const unsubProfile = onSnapshot(doc(db, 'users', auth.currentUser.uid), async (snapshot) => {
+      const profileData = snapshot.data() as UserProfile;
       setProfile(profileData);
       
       if (profileData) {
         const monthlyTarget = profileData.dailyTarget * 30;
         const progress = Math.min(100, Math.round((profileData.totalStudyHours / monthlyTarget) * 100));
         setGoalProgress(progress);
+
+        // Check for missed day and reset streak
+        const today = new Date().toISOString().split('T')[0];
+        const lastDate = profileData.lastStudyDate;
+        
+        if (lastDate && lastDate !== today) {
+          const last = new Date(lastDate);
+          const current = new Date(today);
+          const diffTime = Math.abs(current.getTime() - last.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays > 1) {
+            // Missed more than a day, reset streak
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+              streak: 0
+            });
+          }
+        }
       }
     });
 

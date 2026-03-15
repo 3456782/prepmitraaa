@@ -12,6 +12,7 @@ export interface UserProfile {
   city: string;
   streak: number;
   totalStudyHours: number;
+  lastStudyDate?: string;
   createdAt: any;
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Coffee, Brain } from 'lucide-react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 
 export default function PomodoroTimer() {
   const [minutes, setMinutes] = useState(25);
@@ -33,18 +33,47 @@ export default function PomodoroTimer() {
     if (!isBreak) {
       // Log study session
       if (auth.currentUser) {
+        const today = new Date().toISOString().split('T')[0];
         const durationSeconds = 25 * 60;
+        
         await addDoc(collection(db, 'studySessions'), {
           userId: auth.currentUser.uid,
           duration: durationSeconds,
-          date: new Date().toISOString().split('T')[0],
+          date: today,
           timestamp: serverTimestamp(),
         });
         
-        // Update user's total study hours
-        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-          totalStudyHours: increment(25 / 60) // increment by hours
-        });
+        // Update user's total study hours and streak
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const lastDate = userData.lastStudyDate;
+          let newStreak = userData.streak || 0;
+          
+          if (!lastDate) {
+            newStreak = 1;
+          } else {
+            const last = new Date(lastDate);
+            const current = new Date(today);
+            const diffTime = Math.abs(current.getTime() - last.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+              newStreak += 1;
+            } else if (diffDays > 1) {
+              newStreak = 1;
+            }
+            // if diffDays === 0, streak stays same
+          }
+          
+          await updateDoc(userRef, {
+            totalStudyHours: increment(25 / 60),
+            streak: newStreak,
+            lastStudyDate: today
+          });
+        }
       }
       alert('Focus session complete! Take a break.');
       setMinutes(5);
