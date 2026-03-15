@@ -8,6 +8,7 @@ export interface UserProfile {
   studyHoursStart: string;
   studyHoursEnd: string;
   dailyTarget: number;
+  goals: string[];
   language: string;
   city: string;
   streak: number;

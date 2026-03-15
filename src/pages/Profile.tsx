@@ -23,6 +23,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [partnersCount, setPartnersCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<Partial<UserProfile>>({});
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -30,7 +31,9 @@ export default function Profile() {
   useEffect(() => {
     if (!auth.currentUser) return;
     const unsub = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
-      setProfile(doc.data() as UserProfile);
+      const data = doc.data() as UserProfile;
+      setProfile(data);
+      setEditedProfile(data);
     });
 
     const qPartners = query(
@@ -51,6 +54,17 @@ export default function Profile() {
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/');
+  };
+
+  const handleSave = async () => {
+    if (!auth.currentUser) return;
+    try {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), editedProfile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile.');
+    }
   };
 
   const handleImageClick = () => {
@@ -181,7 +195,7 @@ export default function Profile() {
                 <Settings className="text-indigo-400" size={20} /> Study Preferences
               </h3>
               <button 
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
                 className="text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 {isEditing ? 'Save Changes' : 'Edit Profile'}
@@ -193,25 +207,89 @@ export default function Profile() {
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                   <Book size={12} /> Target Exam
                 </label>
-                <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200">
-                  {profile.exam}
-                </div>
+                {isEditing ? (
+                  <input 
+                    type="text"
+                    value={editedProfile.exam || ''}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, exam: e.target.value })}
+                    className="w-full p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200 focus:outline-none focus:border-indigo-500/50"
+                  />
+                ) : (
+                  <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200">
+                    {profile.exam}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                   <Clock size={12} /> Study Hours
                 </label>
-                <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200">
-                  {profile.studyHoursStart} - {profile.studyHoursEnd}
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <>
+                      <input 
+                        type="time"
+                        value={editedProfile.studyHoursStart || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, studyHoursStart: e.target.value })}
+                        className="flex-1 p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200 focus:outline-none focus:border-indigo-500/50"
+                      />
+                      <input 
+                        type="time"
+                        value={editedProfile.studyHoursEnd || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, studyHoursEnd: e.target.value })}
+                        className="flex-1 p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200 focus:outline-none focus:border-indigo-500/50"
+                      />
+                    </>
+                  ) : (
+                    <div className="w-full p-4 bg-zinc-950/50 border border-white/5 rounded-2xl font-bold text-zinc-200">
+                      {profile.studyHoursStart} - {profile.studyHoursEnd}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                  <Target size={12} /> Study Goals
+                  <Book size={12} /> Subjects (comma separated)
                 </label>
-                <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-2xl text-sm text-zinc-400 leading-relaxed">
-                  I am focusing on cracking the {profile.exam} this year. Looking for a partner who is consistent and can help with mock tests and revisions.
-                </div>
+                {isEditing ? (
+                  <input 
+                    type="text"
+                    value={editedProfile.subjects?.join(', ') || ''}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, subjects: e.target.value.split(',').map(s => s.trim()) })}
+                    className="w-full p-4 bg-zinc-950/50 border border-white/5 rounded-2xl text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50"
+                    placeholder="e.g. Mathematics, Physics, Chemistry"
+                  />
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.subjects?.map((subject, i) => (
+                      <span key={i} className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold">
+                        {subject}
+                      </span>
+                    )) || <span className="text-zinc-600 text-xs italic">No subjects added</span>}
+                  </div>
+                )}
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  <Target size={12} /> Shared Goals (comma separated)
+                </label>
+                {isEditing ? (
+                  <input 
+                    type="text"
+                    value={editedProfile.goals?.join(', ') || ''}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, goals: e.target.value.split(',').map(g => g.trim()) })}
+                    className="w-full p-4 bg-zinc-950/50 border border-white/5 rounded-2xl text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50"
+                    placeholder="e.g. Daily Revision, Mock Tests, Group Study"
+                  />
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.goals?.map((goal, i) => (
+                      <span key={i} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold">
+                        {goal}
+                      </span>
+                    )) || <span className="text-zinc-600 text-xs italic">No goals added</span>}
+                  </div>
+                )}
               </div>
             </div>
           </div>

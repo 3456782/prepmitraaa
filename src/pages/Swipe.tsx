@@ -62,7 +62,19 @@ export default function Swipe() {
         
         score += Math.floor(overlapMinutes / 30) * 5; // 5 points for every 30 mins overlap
         
-        // 3. Daily Target Similarity (Low Priority)
+        // 3. Common Subjects (Medium Priority)
+        if (profile.subjects && myData.subjects) {
+          const commonSubjects = profile.subjects.filter(s => myData.subjects.includes(s));
+          score += commonSubjects.length * 15;
+        }
+        
+        // 4. Shared Goals (Medium Priority)
+        if (profile.goals && myData.goals) {
+          const commonGoals = profile.goals.filter(g => myData.goals.includes(g));
+          score += commonGoals.length * 20;
+        }
+        
+        // 5. Daily Target Similarity (Low Priority)
         const targetDiff = Math.abs(profile.dailyTarget - myData.dailyTarget);
         if (targetDiff <= 2) score += 10;
         
