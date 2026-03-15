@@ -81,6 +81,18 @@
         "date": { "type": "string", "format": "date" },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "todoItems": {
+      "title": "To-Do Item",
+      "description": "Daily tasks for the user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "text": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "date": { "type": "string", "format": "date" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -107,6 +119,10 @@
     "practiceTests/{testId}": {
       "schema": "practiceTests",
       "description": "Practice test scores"
+    },
+    "todoItems/{todoId}": {
+      "schema": "todoItems",
+      "description": "User to-do items"
     }
   }
 }

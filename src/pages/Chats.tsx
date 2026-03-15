@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, User, ChevronLeft } from 'lucide-react';
+import { MessageSquare, Send, User, ChevronLeft, ListTodo, X } from 'lucide-react';
 import { Match, Message, UserProfile } from '../types';
+import DailyTasks from '../components/DailyTasks';
 
 export default function Chats() {
   const [matches, setMatches] = useState<(Match & { partner: UserProfile })[]>([]);
@@ -11,6 +12,7 @@ export default function Chats() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showPartnerTasks, setShowPartnerTasks] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -109,37 +111,70 @@ export default function Chats() {
       <div className={`${!selectedMatch ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-zinc-900/20`}>
         {selectedMatch ? (
           <>
-            <div className="p-4 border-b border-white/5 flex items-center gap-4 bg-zinc-950/50 backdrop-blur-xl">
-              <button onClick={() => setSelectedMatch(null)} className="md:hidden p-2 text-zinc-400">
-                <ChevronLeft size={24} />
-              </button>
-              <img 
-                src={selectedMatch.partner.photoURL || `https://picsum.photos/seed/${selectedMatch.partner.uid}/100/100`} 
-                className="w-10 h-10 rounded-full object-cover"
-                alt=""
-              />
-              <div>
-                <h4 className="font-bold">{selectedMatch.partner.name}</h4>
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online</span>
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-zinc-950/50 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <button onClick={() => setSelectedMatch(null)} className="md:hidden p-2 text-zinc-400">
+                  <ChevronLeft size={24} />
+                </button>
+                <img 
+                  src={selectedMatch.partner.photoURL || `https://picsum.photos/seed/${selectedMatch.partner.uid}/100/100`} 
+                  className="w-10 h-10 rounded-full object-cover"
+                  alt=""
+                />
+                <div>
+                  <h4 className="font-bold">{selectedMatch.partner.name}</h4>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online</span>
+                </div>
               </div>
+              <button 
+                onClick={() => setShowPartnerTasks(true)}
+                className="p-2 text-zinc-400 hover:text-indigo-400 transition-colors"
+                title="View Partner's Tasks"
+              >
+                <ListTodo size={24} />
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  className={`flex ${msg.senderId === auth.currentUser?.uid ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[70%] p-4 rounded-2xl text-sm font-medium ${
-                    msg.senderId === auth.currentUser?.uid 
-                    ? 'bg-indigo-600 text-white rounded-tr-none' 
-                    : 'bg-zinc-800 text-zinc-100 rounded-tl-none'
-                  }`}>
-                    {msg.text}
+            <div className="flex-1 flex overflow-hidden relative">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {messages.map((msg) => (
+                  <div 
+                    key={msg.id}
+                    className={`flex ${msg.senderId === auth.currentUser?.uid ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[70%] p-4 rounded-2xl text-sm font-medium ${
+                      msg.senderId === auth.currentUser?.uid 
+                      ? 'bg-indigo-600 text-white rounded-tr-none' 
+                      : 'bg-zinc-800 text-zinc-100 rounded-tl-none'
+                    }`}>
+                      {msg.text}
+                    </div>
                   </div>
-                </div>
-              ))}
-              <div ref={scrollRef} />
+                ))}
+                <div ref={scrollRef} />
+              </div>
+
+              {/* Partner Tasks Sidebar/Overlay */}
+              <AnimatePresence>
+                {showPartnerTasks && (
+                  <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    className="absolute inset-y-0 right-0 w-full sm:w-80 bg-zinc-950 border-l border-white/5 z-30 shadow-2xl"
+                  >
+                    <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                      <h3 className="font-bold">Partner's Progress</h3>
+                      <button onClick={() => setShowPartnerTasks(false)} className="text-zinc-500 hover:text-white">
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="p-4 overflow-y-auto h-full pb-20">
+                      <DailyTasks userId={selectedMatch.partner.uid} isReadOnly />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <form onSubmit={handleSendMessage} className="p-4 bg-zinc-950/50 border-t border-white/5">

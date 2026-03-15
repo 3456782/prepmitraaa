@@ -59,3 +59,12 @@ export interface PracticeTest {
   date: string;
   timestamp: any;
 }
+
+export interface TodoItem {
+  id: string;
+  userId: string;
+  text: string;
+  completed: boolean;
+  date: string;
+  createdAt: any;
+}

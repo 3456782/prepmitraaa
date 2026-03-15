@@ -53,5 +53,21 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
+
+    // To-Do Items
+    match /todoItems/{todoId} {
+      function isPartner(ownerId) {
+        let matchId1 = request.auth.uid + '_' + ownerId;
+        let matchId2 = ownerId + '_' + request.auth.uid;
+        return (exists(/databases/$(database)/documents/matches/$(matchId1)) && get(/databases/$(database)/documents/matches/$(matchId1)).data.status == 'accepted') || 
+               (exists(/databases/$(database)/documents/matches/$(matchId2)) && get(/databases/$(database)/documents/matches/$(matchId2)).data.status == 'accepted');
+      }
+      
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isPartner(resource.data.userId)
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
   }
 }

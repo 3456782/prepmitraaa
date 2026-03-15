@@ -25,6 +25,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import PomodoroTimer from '../components/PomodoroTimer';
+import DailyTasks from '../components/DailyTasks';
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -208,6 +209,11 @@ export default function Dashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+          {/* Daily Tasks Section */}
+          <div className="md:col-span-3">
+            <DailyTasks />
           </div>
         </div>
 
