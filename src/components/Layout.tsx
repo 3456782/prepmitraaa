@@ -9,6 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isLanding = location.pathname === '/';
   const isAuth = location.pathname === '/auth';
+  const isChat = location.pathname === '/chats';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -24,7 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className={`${!isLanding && !isAuth ? 'md:pl-20 pb-24 md:pb-0' : ''}`}>
         {children}
       </main>
-      {!isLanding && !isAuth && <AIMentor />}
+      {!isLanding && !isAuth && !isChat && <AIMentor />}
     </div>
   );
 }

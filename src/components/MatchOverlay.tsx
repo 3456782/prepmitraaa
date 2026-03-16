@@ -1,6 +1,6 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
-import { MessageSquare, X, BookOpen } from 'lucide-react';
+import { MessageSquare, X, BookOpen, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface MatchOverlayProps {
@@ -17,8 +17,35 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-zinc-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center"
+      className="fixed inset-0 z-[100] bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center overflow-hidden"
     >
+      {/* Background Sparkles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ 
+              opacity: 0, 
+              scale: 0,
+              x: Math.random() * 400,
+              y: Math.random() * 800 
+            }}
+            animate={{ 
+              opacity: [0, 1, 0], 
+              scale: [0, 1, 0],
+              y: '-=100'
+            }}
+            transition={{ 
+              duration: 2 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2
+            }}
+            className="absolute text-emerald-500/30"
+          >
+            <Sparkles size={Math.random() * 20 + 10} />
+          </motion.div>
+        ))}
+      </div>
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -49,40 +76,36 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
         </div>
       </motion.div>
 
-      <motion.h2 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="text-5xl font-black mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent italic"
-      >
-        IT'S A MATCH!
-      </motion.h2>
-      
-      <motion.p 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-zinc-400 text-lg mb-12 max-w-xs"
-      >
-        You and {partnerProfile.name} are now study partners. Start planning your sessions!
-      </motion.p>
-
-      <motion.div 
-        initial={{ y: 20, opacity: 0 }}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
+      >
+        <h2 className="text-6xl font-black mb-4 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent italic tracking-tighter">
+          IT'S A MATCH!
+        </h2>
+        
+        <p className="text-zinc-400 text-lg mb-12 max-w-xs mx-auto leading-relaxed">
+          You and <span className="text-white font-bold">{partnerProfile.name}</span> are now study partners. Ready to crush those goals?
+        </p>
+      </motion.div>
+
+      <motion.div 
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.7 }}
         className="flex flex-col w-full max-w-xs gap-4"
       >
         <button 
           onClick={() => navigate('/chats')}
-          className="w-full py-4 bg-emerald-500 text-zinc-950 font-bold rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+          className="w-full py-5 bg-emerald-500 text-zinc-950 font-black rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-105 transition-transform active:scale-95"
         >
-          <MessageSquare size={20} />
-          Send a Message
+          <MessageSquare size={24} fill="currentColor" />
+          START CHATTING
         </button>
         <button 
           onClick={onClose}
-          className="w-full py-4 bg-zinc-900 text-zinc-400 font-bold rounded-2xl border border-zinc-800"
+          className="w-full py-5 bg-zinc-900 text-zinc-400 font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-colors"
         >
           Keep Swiping
         </button>

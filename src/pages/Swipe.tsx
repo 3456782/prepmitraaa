@@ -215,7 +215,14 @@ export default function Swipe() {
   }
 
   return (
-    <div className="relative h-[70vh] w-full max-w-md mx-auto">
+    <div className="relative h-[75vh] w-full max-w-md mx-auto flex flex-col">
+      {/* Ambient Background Glow */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />
+        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-emerald-500/5 blur-[100px] rounded-full" />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-red-500/5 blur-[100px] rounded-full" />
+      </div>
+
       <AnimatePresence>
         {matchedPartner && myProfile && (
           <MatchOverlay 
@@ -224,13 +231,34 @@ export default function Swipe() {
             onClose={() => setMatchedPartner(null)}
           />
         )}
-        {profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, i) => (
-          <SwipeCard 
-            key={profile.uid} 
-            profile={profile} 
-            onSwipe={handleSwipe}
-          />
-        ))}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <AnimatePresence mode="popLayout">
+            {profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, i) => {
+              const isFront = i === 1 || profiles.length - currentIndex === 1;
+              return (
+                <motion.div
+                  key={profile.uid}
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ 
+                    scale: isFront ? 1 : 0.9, 
+                    opacity: 1,
+                    y: isFront ? 0 : 20,
+                    zIndex: isFront ? 10 : 0
+                  }}
+                  exit={{ x: 500, opacity: 0, scale: 0.5, rotate: 45 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute inset-0"
+                >
+                  <SwipeCard 
+                    profile={profile} 
+                    onSwipe={handleSwipe}
+                    isFront={isFront}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
       </AnimatePresence>
 
       {/* Action Buttons */}
