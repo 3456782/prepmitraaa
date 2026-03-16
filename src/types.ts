@@ -14,6 +14,7 @@ export interface UserProfile {
   streak: number;
   totalStudyHours: number;
   lastStudyDate?: string;
+  badges: string[];
   createdAt: any;
 }
 
@@ -75,7 +76,7 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'streak_reset' | 'match' | 'message' | 'system';
+  type: 'streak_reset' | 'match' | 'message' | 'system' | 'badge_earned';
   read: boolean;
   createdAt: any;
 }

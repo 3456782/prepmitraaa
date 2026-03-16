@@ -45,6 +45,20 @@ export default function NotificationCenter() {
     });
   };
 
+  const markAllAsRead = async () => {
+    const unread = notifications.filter(n => !n.read);
+    const promises = unread.map(n => 
+      updateDoc(doc(db, 'notifications', n.id), { read: true })
+    );
+    await Promise.all(promises);
+  };
+
+  useEffect(() => {
+    if (isOpen && unreadCount > 0) {
+      markAllAsRead();
+    }
+  }, [isOpen, unreadCount]);
+
   const deleteNotification = async (id: string) => {
     await deleteDoc(doc(db, 'notifications', id));
   };

@@ -26,7 +26,8 @@ import {
   ChevronRight,
   X
 } from 'lucide-react';
-import { Topic, PracticeTest } from '../types';
+import { Topic, PracticeTest, UserProfile } from '../types';
+import { BADGES } from '../constants/badges';
 import { 
   LineChart, 
   Line, 
@@ -38,6 +39,7 @@ import {
 } from 'recharts';
 
 export default function Progress() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [tests, setTests] = useState<PracticeTest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,10 @@ export default function Progress() {
       setTopics(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Topic)));
     });
 
+    const unsubProfile = onSnapshot(doc(db, 'users', auth.currentUser.uid), (snapshot) => {
+      setProfile(snapshot.data() as UserProfile);
+    });
+
     const qTests = query(
       collection(db, 'practiceTests'),
       where('userId', '==', auth.currentUser.uid),
@@ -73,6 +79,7 @@ export default function Progress() {
 
     return () => {
       unsubTopics();
+      unsubProfile();
       unsubTests();
     };
   }, []);
@@ -320,6 +327,76 @@ export default function Progress() {
                 <div className="text-center text-zinc-600 text-sm italic">No test history</div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Badges Progress */}
+        <div className="glass-card p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Award className="text-indigo-400" size={20} /> Badge Milestones
+            </h3>
+            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">
+              {profile?.badges?.length || 0} / {BADGES.length} Earned
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {BADGES.map((badge) => {
+              const isEarned = profile?.badges?.includes(badge.id);
+              const Icon = badge.icon;
+              
+              // Calculate progress for specific badges
+              let progress = 0;
+              let targetValue = 0;
+              let currentValue = 0;
+              let unit = '';
+
+              if (badge.id.startsWith('streak_')) {
+                targetValue = parseInt(badge.id.split('_')[1]);
+                currentValue = profile?.streak || 0;
+                unit = 'days';
+              } else if (badge.id.startsWith('hours_')) {
+                targetValue = parseInt(badge.id.split('_')[1]);
+                currentValue = profile?.totalStudyHours || 0;
+                unit = 'hours';
+              }
+
+              progress = targetValue > 0 ? Math.min(100, Math.round((currentValue / targetValue) * 100)) : (isEarned ? 100 : 0);
+
+              return (
+                <div key={badge.id} className={`p-6 rounded-2xl border transition-all ${isEarned ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-zinc-950/50 border-white/5'}`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`p-3 rounded-xl ${isEarned ? 'bg-indigo-500/10' : 'bg-zinc-900'}`}>
+                      <Icon size={24} className={isEarned ? badge.color : 'text-zinc-600'} />
+                    </div>
+                    {isEarned && (
+                      <div className="bg-indigo-500 text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md text-white">
+                        Earned
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-bold text-sm mb-1">{badge.name}</h4>
+                  <p className="text-[10px] text-zinc-500 leading-tight mb-4">{badge.description}</p>
+                  
+                  {!isEarned && targetValue > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                        <span className="text-zinc-500">{currentValue} / {targetValue} {unit}</span>
+                        <span className="text-indigo-400">{progress}%</span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          className="h-full bg-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

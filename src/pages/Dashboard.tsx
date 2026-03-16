@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import PomodoroTimer from '../components/PomodoroTimer';
 import DailyTasks from '../components/DailyTasks';
+import { BADGES } from '../constants/badges';
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -122,6 +123,47 @@ export default function Dashboard() {
       unsubPartners();
     };
   }, []);
+
+  // Award Badges Effect
+  useEffect(() => {
+    if (!auth.currentUser || !profile) return;
+
+    const checkBadges = async () => {
+      const earnedBadges = profile.badges || [];
+      const newBadges: string[] = [];
+      
+      BADGES.forEach(badge => {
+        if (!earnedBadges.includes(badge.id)) {
+          const extendedProfile = { ...profile, partnersCount };
+          if (badge.criteria(extendedProfile)) {
+            newBadges.push(badge.id);
+          }
+        }
+      });
+
+      if (newBadges.length > 0) {
+        const updatedBadges = [...earnedBadges, ...newBadges];
+        await updateDoc(doc(db, 'users', auth.currentUser!.uid), {
+          badges: updatedBadges
+        });
+
+        const notificationPromises = newBadges.map(badgeId => {
+          const badge = BADGES.find(b => b.id === badgeId);
+          return addDoc(collection(db, 'notifications'), {
+            userId: auth.currentUser!.uid,
+            title: 'New Badge Earned! 🏆',
+            message: `Congratulations! You've earned the "${badge?.name}" badge: ${badge?.description}`,
+            type: 'badge_earned',
+            read: false,
+            createdAt: serverTimestamp()
+          });
+        });
+        await Promise.all(notificationPromises);
+      }
+    };
+
+    checkBadges();
+  }, [profile, partnersCount]);
 
   // Calculate real chart data from sessions
   const getChartData = () => {

@@ -18,6 +18,7 @@ import {
 import { UserProfile } from '../types';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { BADGES } from '../constants/badges';
 
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -298,12 +299,37 @@ export default function Profile() {
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Award className="text-indigo-400" size={20} /> Achievements
             </h3>
-            <div className="grid grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="aspect-square bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-700 border border-white/5">
-                  <Award size={24} />
-                </div>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {BADGES.map((badge) => {
+                const isEarned = profile.badges?.includes(badge.id);
+                const Icon = badge.icon;
+                return (
+                  <div 
+                    key={badge.id} 
+                    className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center gap-2 border transition-all group ${
+                      isEarned 
+                        ? 'bg-zinc-900 border-indigo-500/30' 
+                        : 'bg-zinc-950/50 border-white/5 grayscale opacity-40'
+                    }`}
+                  >
+                    <div className={`p-3 rounded-xl ${isEarned ? 'bg-indigo-500/10' : 'bg-zinc-800'}`}>
+                      <Icon size={24} className={isEarned ? badge.color : 'text-zinc-600'} />
+                    </div>
+                    <span className={`text-[9px] font-black uppercase tracking-tighter text-center px-2 ${isEarned ? 'text-zinc-200' : 'text-zinc-600'}`}>
+                      {badge.name}
+                    </span>
+                    
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-40 p-2 bg-zinc-900 border border-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 shadow-2xl">
+                      <p className="text-[10px] font-bold text-white mb-1">{badge.name}</p>
+                      <p className="text-[9px] text-zinc-500 leading-tight">{badge.description}</p>
+                      {!isEarned && (
+                        <p className="text-[8px] text-indigo-400 mt-1 font-black uppercase">Locked</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
