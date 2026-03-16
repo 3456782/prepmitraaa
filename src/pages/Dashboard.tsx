@@ -47,20 +47,34 @@ export default function Dashboard() {
         const progress = Math.min(100, Math.round((profileData.totalStudyHours / monthlyTarget) * 100));
         setGoalProgress(progress);
 
-        // Check for missed day and reset streak
-        const today = new Date().toISOString().split('T')[0];
+        // Check for missed day and reset/increment streak
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
         const lastDate = profileData.lastStudyDate;
         
-        if (lastDate && lastDate !== today) {
-          const last = new Date(lastDate);
-          const current = new Date(today);
-          const diffTime = Math.abs(current.getTime() - last.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
-          if (diffDays > 1) {
-            // Missed more than a day, reset streak
+        if (!lastDate) {
+          // First time visit
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+            streak: 1,
+            lastStudyDate: todayStr
+          });
+        } else if (lastDate !== todayStr) {
+          if (lastDate === yesterdayStr) {
+            // Consecutive day
             await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-              streak: 0
+              streak: (profileData.streak || 0) + 1,
+              lastStudyDate: todayStr
+            });
+          } else {
+            // Missed a day or more
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+              streak: 1,
+              lastStudyDate: todayStr
             });
 
             // Create notification

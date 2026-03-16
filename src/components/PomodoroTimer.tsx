@@ -49,29 +49,30 @@ export default function PomodoroTimer() {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          const today = new Date();
+          const todayStr = today.toISOString().split('T')[0];
+          
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          
           const lastDate = userData.lastStudyDate;
           let newStreak = userData.streak || 0;
           
           if (!lastDate) {
             newStreak = 1;
-          } else {
-            const last = new Date(lastDate);
-            const current = new Date(today);
-            const diffTime = Math.abs(current.getTime() - last.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 1) {
+          } else if (lastDate !== todayStr) {
+            if (lastDate === yesterdayStr) {
               newStreak += 1;
-            } else if (diffDays > 1) {
+            } else {
               newStreak = 1;
             }
-            // if diffDays === 0, streak stays same
           }
           
           await updateDoc(userRef, {
             totalStudyHours: increment(25 / 60),
             streak: newStreak,
-            lastStudyDate: today
+            lastStudyDate: todayStr
           });
         }
       }
