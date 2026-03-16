@@ -14,6 +14,7 @@ export default function Swipe() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
   const [matchedPartner, setMatchedPartner] = useState<UserProfile | null>(null);
+  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -119,13 +120,14 @@ export default function Swipe() {
     fetchProfiles();
   }, []);
 
-  const handleSwipe = async (direction: 'left' | 'right') => {
+  const handleSwipe = async (swipeDir: 'left' | 'right') => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
-    console.log(`[SWIPE] ${direction} on:`, currentProfile.name, `(UID: ${currentProfile.uid})`);
+    setDirection(swipeDir);
+    console.log(`[SWIPE] ${swipeDir} on:`, currentProfile.name, `(UID: ${currentProfile.uid})`);
     
-    if (direction === 'right' && auth.currentUser) {
+    if (swipeDir === 'right' && auth.currentUser) {
       if (!myProfile) {
         console.error('[SWIPE] My profile not loaded, cannot create match');
         return;
@@ -144,8 +146,7 @@ export default function Swipe() {
         if (matchDoc.exists()) {
           const data = matchDoc.data();
           console.log('[SWIPE] Existing match found:', data);
-          
-          if (data.initiator !== myUid && data.status === 'pending') {
+                    if (data.initiator !== myUid && data.status === 'pending') {
             console.log('[SWIPE] Mutual match! Updating to accepted.');
             await updateDoc(matchRef, {
               status: 'accepted',
@@ -238,15 +239,24 @@ export default function Swipe() {
               return (
                 <motion.div
                   key={profile.uid}
-                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ 
-                    scale: isFront ? 1 : 0.9, 
-                    opacity: 1,
-                    y: isFront ? 0 : 20,
+                    scale: isFront ? 1 : 0.92, 
+                    opacity: isFront ? 1 : 0.6,
+                    y: isFront ? 0 : -10,
                     zIndex: isFront ? 10 : 0
                   }}
-                  exit={{ x: 500, opacity: 0, scale: 0.5, rotate: 45 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  exit={{ 
+                    x: direction === 'right' ? 500 : -500, 
+                    opacity: 0, 
+                    scale: 0.5, 
+                    rotate: direction === 'right' ? 45 : -45 
+                  }}
+                  transition={{ 
+                    type: 'spring', 
+                    stiffness: 260, 
+                    damping: 20 
+                  }}
                   className="absolute inset-0"
                 >
                   <SwipeCard 
