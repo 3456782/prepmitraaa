@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   orderBy
 } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   CheckCircle2, 
@@ -46,6 +47,8 @@ export default function DailyTasks({ userId, isReadOnly = false }: DailyTasksPro
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setTodos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TodoItem)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'todoItems');
     });
 
     return () => unsubscribe();

@@ -12,8 +12,9 @@ import {
   addDoc,
   deleteDoc
 } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserPlus, X, Check, Heart } from 'lucide-react';
+import { UserPlus, X, Check, BookOpen } from 'lucide-react';
 import { Match, UserProfile } from '../types';
 
 export default function MatchRequestManager() {
@@ -54,6 +55,8 @@ export default function MatchRequestManager() {
       } else {
         setPendingMatch(null);
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'matches');
     });
 
     return () => unsubscribe();
@@ -105,7 +108,7 @@ export default function MatchRequestManager() {
                 alt=""
               />
               <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white border-4 border-zinc-900">
-                <Heart size={18} fill="currentColor" />
+                <BookOpen size={18} fill="currentColor" />
               </div>
             </div>
 

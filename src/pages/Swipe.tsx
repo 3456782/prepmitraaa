@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 import { motion, AnimatePresence } from 'motion/react';
 import SwipeCard from '../components/SwipeCard';
 import MatchOverlay from '../components/MatchOverlay';
 import { UserProfile } from '../types';
-import { Search, Heart, X } from 'lucide-react';
+import { Search, BookOpen, X } from 'lucide-react';
 
 export default function Swipe() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -23,13 +24,29 @@ export default function Swipe() {
       const myData = myDoc.data() as UserProfile;
       setMyProfile(myData);
 
-      // Fetch my matches to filter out already swiped users
+      // Fetch my matches to filter out users I've already swiped on
       const matchesQuery = query(
         collection(db, 'matches'),
         where('users', 'array-contains', auth.currentUser.uid)
       );
-      const matchesSnapshot = await getDocs(matchesQuery);
-      const swipedUserIds = matchesSnapshot.docs.flatMap(d => d.data().users).filter(id => id !== auth.currentUser?.uid);
+      let matchesSnapshot;
+      try {
+        matchesSnapshot = await getDocs(matchesQuery);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, 'matches');
+        return;
+      }
+      
+      // Users to filter out: 
+      // 1. Matches already accepted
+      // 2. Matches where I am the initiator (I already swiped right)
+      const swipedUserIds = matchesSnapshot.docs
+        .filter(d => {
+          const data = d.data();
+          return data.status === 'accepted' || data.initiator === auth.currentUser?.uid;
+        })
+        .flatMap(d => d.data().users)
+        .filter(id => id !== auth.currentUser?.uid);
 
       // Fetch other users with same exam
       const q = query(
@@ -38,7 +55,13 @@ export default function Swipe() {
         where('uid', '!=', auth.currentUser.uid)
       );
       
-      const snapshot = await getDocs(q);
+      let snapshot;
+      try {
+        snapshot = await getDocs(q);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, 'users');
+        return;
+      }
       const fetchedProfiles = snapshot.docs
         .map(doc => doc.data() as UserProfile)
         .filter(profile => !swipedUserIds.includes(profile.uid));
@@ -97,55 +120,73 @@ export default function Swipe() {
   }, []);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
-    if (direction === 'right' && auth.currentUser && profiles[currentIndex]) {
-      const targetUser = profiles[currentIndex];
+    const currentProfile = profiles[currentIndex];
+    if (!currentProfile) return;
+
+    console.log(`[SWIPE] ${direction} on:`, currentProfile.name, `(UID: ${currentProfile.uid})`);
+    
+    if (direction === 'right' && auth.currentUser) {
+      if (!myProfile) {
+        console.error('[SWIPE] My profile not loaded, cannot create match');
+        return;
+      }
+
       const myUid = auth.currentUser.uid;
-      const targetUid = targetUser.uid;
+      const targetUid = currentProfile.uid;
       const matchId = [myUid, targetUid].sort().join('_');
       
+      console.log('[SWIPE] Match ID:', matchId);
+      
       const matchRef = doc(db, 'matches', matchId);
-      const matchDoc = await getDoc(matchRef);
+      try {
+        const matchDoc = await getDoc(matchRef);
 
-      if (matchDoc.exists()) {
-        const data = matchDoc.data();
-        if (data.initiator !== myUid && data.status === 'pending') {
-          // Mutual match!
-          await updateDoc(matchRef, {
-            status: 'accepted',
-            updatedAt: serverTimestamp()
+        if (matchDoc.exists()) {
+          const data = matchDoc.data();
+          console.log('[SWIPE] Existing match found:', data);
+          
+          if (data.initiator !== myUid && data.status === 'pending') {
+            console.log('[SWIPE] Mutual match! Updating to accepted.');
+            await updateDoc(matchRef, {
+              status: 'accepted',
+              updatedAt: serverTimestamp()
+            });
+            setMatchedPartner(currentProfile);
+
+            await addDoc(collection(db, 'notifications'), {
+              userId: targetUid,
+              title: 'New Match!',
+              message: `${myProfile.name} accepted your study request! Start chatting now.`,
+              type: 'match',
+              read: false,
+              createdAt: serverTimestamp()
+            });
+          } else {
+            console.log('[SWIPE] Already liked or already matched.');
+          }
+        } else {
+          console.log('[SWIPE] Creating new pending match.');
+          await setDoc(matchRef, {
+            id: matchId,
+            users: [myUid, targetUid].sort(),
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            initiator: myUid,
           });
-          setMatchedPartner(targetUser);
 
-          // Notify the other user that they matched
           await addDoc(collection(db, 'notifications'), {
             userId: targetUid,
-            title: 'New Match!',
-            message: `${myProfile?.name || 'Someone'} accepted your study request! Start chatting now.`,
+            title: 'Study Request',
+            message: `${myProfile.name} wants to be your study partner!`,
             type: 'match',
             read: false,
             createdAt: serverTimestamp()
           });
         }
-      } else {
-        // First time liking
-        await setDoc(matchRef, {
-          id: matchId,
-          users: [myUid, targetUid].sort(),
-          status: 'pending',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          initiator: myUid,
-        });
-
-        // Send notification to target user
-        await addDoc(collection(db, 'notifications'), {
-          userId: targetUid,
-          title: 'Study Request',
-          message: `${myProfile?.name || 'Someone'} wants to be your study partner!`,
-          type: 'match',
-          read: false,
-          createdAt: serverTimestamp()
-        });
+      } catch (error) {
+        console.error('[SWIPE] Firestore Error:', error);
+        handleFirestoreError(error, OperationType.WRITE, `matches/${matchId}`);
       }
     }
     
@@ -193,18 +234,18 @@ export default function Swipe() {
       </AnimatePresence>
 
       {/* Action Buttons */}
-      <div className="absolute bottom-[-80px] left-0 right-0 flex justify-center gap-6">
+      <div className="absolute -bottom-20 left-0 right-0 flex justify-center gap-6 z-30">
         <button 
           onClick={() => handleSwipe('left')}
-          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors shadow-lg"
+          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all active:scale-90 shadow-lg"
         >
           <X size={32} />
         </button>
         <button 
           onClick={() => handleSwipe('right')}
-          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-indigo-500 hover:bg-indigo-500/10 transition-colors shadow-lg"
+          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-indigo-500 hover:bg-indigo-500/10 transition-all active:scale-90 shadow-lg"
         >
-          <Heart size={32} fill="currentColor" />
+          <BookOpen size={32} fill="currentColor" />
         </button>
       </div>
     </div>

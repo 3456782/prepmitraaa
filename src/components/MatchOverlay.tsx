@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { UserProfile } from '../types';
-import { MessageSquare, X, Heart } from 'lucide-react';
+import { MessageSquare, X, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface MatchOverlayProps {
@@ -29,7 +29,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
           <motion.img 
             initial={{ x: -50, rotate: -10 }}
             animate={{ x: 0, rotate: -5 }}
-            src={myProfile.photoURL} 
+            src={myProfile.photoURL || `https://picsum.photos/seed/${myProfile.uid}/300/300`} 
             className="w-32 h-32 rounded-[2rem] border-4 border-emerald-500 object-cover shadow-2xl"
           />
           <motion.div 
@@ -38,7 +38,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
             transition={{ delay: 0.3 }}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-zinc-950 p-3 rounded-full border border-zinc-800"
           >
-            <Heart size={32} className="text-emerald-500" fill="currentColor" />
+            <BookOpen size={32} className="text-emerald-500" fill="currentColor" />
           </motion.div>
           <motion.img 
             initial={{ x: 50, rotate: 10 }}

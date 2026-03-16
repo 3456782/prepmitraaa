@@ -5,6 +5,7 @@ import { auth, db } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { NotificationProvider } from './components/NotificationProvider';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import ProfileSetup from './pages/ProfileSetup';
@@ -46,47 +47,49 @@ export default function App() {
   }
 
   return (
-    <Router>
-      <NotificationProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
-            <Route path="/auth" element={user ? <Navigate to="/dashboard" /> : <Auth />} />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/setup" 
-              element={user ? (hasProfile ? <Navigate to="/dashboard" /> : <ProfileSetup />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/dashboard" 
-              element={user ? (hasProfile ? <Dashboard /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/swipe" 
-              element={user ? (hasProfile ? <Swipe /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/chats" 
-              element={user ? (hasProfile ? <Chats /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/leaderboard" 
-              element={user ? (hasProfile ? <Leaderboard /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/profile" 
-              element={user ? (hasProfile ? <Profile /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/progress" 
-              element={user ? (hasProfile ? <Progress /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-            />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-          </Routes>
-        </Layout>
-      </NotificationProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <NotificationProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
+              <Route path="/auth" element={user ? <Navigate to="/dashboard" /> : <Auth />} />
+              
+              {/* Protected Routes */}
+              <Route 
+                path="/setup" 
+                element={user ? (hasProfile ? <Navigate to="/dashboard" /> : <ProfileSetup />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/dashboard" 
+                element={user ? (hasProfile ? <Dashboard /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/swipe" 
+                element={user ? (hasProfile ? <Swipe /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/chats" 
+                element={user ? (hasProfile ? <Chats /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/leaderboard" 
+                element={user ? (hasProfile ? <Leaderboard /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/profile" 
+                element={user ? (hasProfile ? <Profile /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/progress" 
+                element={user ? (hasProfile ? <Progress /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
+              />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+            </Routes>
+          </Layout>
+        </NotificationProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }

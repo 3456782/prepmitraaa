@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, User, ChevronLeft, ListTodo, X } from 'lucide-react';
 import { Match, Message, UserProfile } from '../types';
@@ -33,6 +34,8 @@ export default function Chats() {
       }));
       setMatches(matchData);
       setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'matches');
     });
 
     return () => unsub();
@@ -50,6 +53,8 @@ export default function Chats() {
       const msgData = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message));
       setMessages(msgData);
       setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `matches/${selectedMatch.id}/messages`);
     });
 
     return () => unsub();
