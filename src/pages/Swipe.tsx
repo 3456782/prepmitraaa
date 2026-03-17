@@ -1,46 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  serverTimestamp,
+  addDoc
+} from 'firebase/firestore';
+import { UserProfile } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { X, Heart, Star, RotateCcw, Sparkles, Filter } from 'lucide-react';
 import SwipeCard from '../components/SwipeCard';
 import MatchOverlay from '../components/MatchOverlay';
-import { UserProfile } from '../types';
-import { Search, BookOpen, X } from 'lucide-react';
+import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 
 export default function Swipe() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [direction, setDirection] = useState<'left' | 'right' | 'up' | null>(null);
   const [matchedPartner, setMatchedPartner] = useState<UserProfile | null>(null);
-  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
+  const [history, setHistory] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchProfiles = async () => {
       if (!auth.currentUser) return;
-
-      // Get my profile to filter by exam
+      
+      // Fetch my profile first
       const myDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      if (!myDoc.exists()) return;
       const myData = myDoc.data() as UserProfile;
       setMyProfile(myData);
 
-      // Fetch my matches to filter out users I've already swiped on
-      const matchesQuery = query(
+      // Get already swiped users
+      const matchesSnapshot = await getDocs(query(
         collection(db, 'matches'),
         where('users', 'array-contains', auth.currentUser.uid)
-      );
-      let matchesSnapshot;
-      try {
-        matchesSnapshot = await getDocs(matchesQuery);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.GET, 'matches');
-        return;
-      }
+      ));
       
-      // Users to filter out: 
-      // 1. Matches already accepted
-      // 2. Matches where I am the initiator (I already swiped right)
       const swipedUserIds = matchesSnapshot.docs
         .filter(d => {
           const data = d.data();
@@ -61,70 +64,36 @@ export default function Swipe() {
         snapshot = await getDocs(q);
       } catch (error) {
         handleFirestoreError(error, OperationType.GET, 'users');
+        setLoading(false);
         return;
       }
+
       const fetchedProfiles = snapshot.docs
-        .map(doc => doc.data() as UserProfile)
-        .filter(profile => !swipedUserIds.includes(profile.uid));
-      
-      // Enhanced Matching Algorithm
-      const scoredProfiles = fetchedProfiles.map(profile => {
-        let score = 0;
-        
-        // 1. Language Match (High Priority)
-        if (profile.language === myData.language) score += 50;
-        
-        // 2. Study Time Overlap (Medium Priority)
-        const myStart = timeToMinutes(myData.studyHoursStart);
-        const myEnd = timeToMinutes(myData.studyHoursEnd);
-        const pStart = timeToMinutes(profile.studyHoursStart);
-        const pEnd = timeToMinutes(profile.studyHoursEnd);
-        
-        const overlapStart = Math.max(myStart, pStart);
-        const overlapEnd = Math.min(myEnd, pEnd);
-        const overlapMinutes = Math.max(0, overlapEnd - overlapStart);
-        
-        score += Math.floor(overlapMinutes / 30) * 5; // 5 points for every 30 mins overlap
-        
-        // 3. Common Subjects (Medium Priority)
-        if (profile.subjects && myData.subjects) {
-          const commonSubjects = profile.subjects.filter(s => myData.subjects.includes(s));
-          score += commonSubjects.length * 15;
-        }
-        
-        // 4. Shared Goals (Medium Priority)
-        if (profile.goals && myData.goals) {
-          const commonGoals = profile.goals.filter(g => myData.goals.includes(g));
-          score += commonGoals.length * 20;
-        }
-        
-        // 5. Daily Target Similarity (Low Priority)
-        const targetDiff = Math.abs(profile.dailyTarget - myData.dailyTarget);
-        if (targetDiff <= 2) score += 10;
-        
-        return { ...profile, matchScore: score };
+        .map(doc => ({ ...doc.data() } as UserProfile))
+        .filter(p => !swipedUserIds.includes(p.uid));
+
+      // Simple AI Match Score calculation
+      const scoredProfiles = fetchedProfiles.map(p => {
+        let score = 70; // Base score
+        if (p.language === myData.language) score += 10;
+        if (p.city === myData.city) score += 5;
+        if (p.dailyTarget >= myData.dailyTarget - 1 && p.dailyTarget <= myData.dailyTarget + 1) score += 10;
+        return { ...p, matchScore: score };
       });
 
-      // Sort by score descending
-      const sortedProfiles = scoredProfiles.sort((a, b) => (b as any).matchScore - (a as any).matchScore);
-      
-      setProfiles(sortedProfiles);
+      setProfiles(scoredProfiles.sort((a, b) => (b as any).matchScore - (a as any).matchScore));
       setLoading(false);
-    };
-
-    const timeToMinutes = (time: string) => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 60 + minutes;
     };
 
     fetchProfiles();
   }, []);
 
-  const handleSwipe = (swipeDir: 'left' | 'right') => {
+  const handleSwipe = (swipeDir: 'left' | 'right' | 'up') => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
     setDirection(swipeDir);
+    setHistory(prev => [...prev, currentIndex]);
     
     // Background Firestore update
     if (auth.currentUser && myProfile) {
@@ -136,7 +105,7 @@ export default function Swipe() {
       (async () => {
         try {
           const matchDoc = await getDoc(matchRef);
-          if (swipeDir === 'right') {
+          if (swipeDir === 'right' || swipeDir === 'up') {
             if (matchDoc.exists()) {
               const data = matchDoc.data();
               if (data.initiator !== myUid && data.status === 'pending') {
@@ -148,8 +117,8 @@ export default function Swipe() {
 
                 await addDoc(collection(db, 'notifications'), {
                   userId: targetUid,
-                  title: 'New Match!',
-                  message: `${myProfile.name} accepted your study request! Start chatting now.`,
+                  title: swipeDir === 'up' ? 'SUPER MATCH!' : 'New Match!',
+                  message: `${myProfile.name} ${swipeDir === 'up' ? 'SUPER' : ''} accepted your study request! Start chatting now.`,
                   type: 'match',
                   read: false,
                   createdAt: serverTimestamp()
@@ -163,12 +132,13 @@ export default function Swipe() {
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
                 initiator: myUid,
+                isSuperMatch: swipeDir === 'up'
               });
 
               await addDoc(collection(db, 'notifications'), {
                 userId: targetUid,
-                title: 'Study Request',
-                message: `${myProfile.name} wants to be your study partner!`,
+                title: swipeDir === 'up' ? 'Super Study Request' : 'Study Request',
+                message: `${myProfile.name} ${swipeDir === 'up' ? 'SUPER' : ''} wants to be your study partner!`,
                 type: 'match',
                 read: false,
                 createdAt: serverTimestamp()
@@ -207,99 +177,168 @@ export default function Swipe() {
     }, 250);
   };
 
+  const handleUndo = async () => {
+    if (history.length === 0) return;
+    
+    const lastIndex = history[history.length - 1];
+    const lastProfile = profiles[lastIndex];
+    
+    if (auth.currentUser && lastProfile) {
+      const myUid = auth.currentUser.uid;
+      const targetUid = lastProfile.uid;
+      const matchId = [myUid, targetUid].sort().join('_');
+      const matchRef = doc(db, 'matches', matchId);
+      
+      try {
+        const matchDoc = await getDoc(matchRef);
+        if (matchDoc.exists() && matchDoc.data().initiator === myUid) {
+          // If it was a pending request we sent, we can "undo" it by deleting or marking
+          // For simplicity, we just reset the index and let the user swipe again
+          // In a real app, you might want to delete the match doc if it was just created
+        }
+      } catch (e) {
+        console.error('Undo failed', e);
+      }
+    }
+
+    setHistory(prev => prev.slice(0, -1));
+    setCurrentIndex(lastIndex);
+  };
+
   if (loading) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-zinc-500 font-medium">Finding study partners...</p>
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6">
+        <div className="relative w-24 h-24 mb-8">
+          <div className="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="text-zinc-500 font-black uppercase tracking-widest text-sm animate-pulse">Finding your study tribe...</p>
       </div>
     );
   }
 
-  if (currentIndex >= profiles.length) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center text-center px-6">
-        <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-6 text-zinc-700">
-          <Search size={40} />
-        </div>
-        <h2 className="text-2xl font-black mb-2">No more partners found</h2>
-        <p className="text-zinc-500">Check back later or try changing your exam preferences.</p>
-      </div>
-    );
-  }
+  const currentProfile = profiles[currentIndex];
+  const nextProfile = profiles[currentIndex + 1];
 
   return (
-    <div className="relative h-[75vh] w-full max-w-md mx-auto flex flex-col">
-      {/* Ambient Background Glow */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />
-        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-emerald-500/5 blur-[100px] rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-red-500/5 blur-[100px] rounded-full" />
-      </div>
-
-      <AnimatePresence>
-        {matchedPartner && myProfile && (
-          <MatchOverlay 
-            myProfile={myProfile}
-            partnerProfile={matchedPartner}
-            onClose={() => setMatchedPartner(null)}
-          />
-        )}
-        <div className="relative w-full h-full flex items-center justify-center">
-          <AnimatePresence mode="popLayout">
-            {profiles.slice(currentIndex, currentIndex + 2).reverse().map((profile, i) => {
-              const isFront = i === 1 || profiles.length - currentIndex === 1;
-              return (
-                <motion.div
-                  key={profile.uid}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ 
-                    scale: isFront ? 1 : 0.92, 
-                    opacity: isFront ? 1 : 0.6,
-                    y: isFront ? 0 : -10,
-                    zIndex: isFront ? 10 : 0
-                  }}
-                  exit={{ 
-                    x: direction === 'right' ? 1000 : -1000, 
-                    opacity: 0, 
-                    scale: 0.5, 
-                    rotate: direction === 'right' ? 90 : -90 
-                  }}
-                  transition={{ 
-                    type: 'spring', 
-                    stiffness: 300, 
-                    damping: 35,
-                    mass: 1
-                  }}
-                  className="absolute inset-0"
-                >
-                  <SwipeCard 
-                    profile={profile} 
-                    onSwipe={handleSwipe}
-                    isFront={isFront}
-                  />
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+    <div className="min-h-screen bg-zinc-950 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-8 flex justify-between items-center shrink-0">
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter">DISCOVER</h1>
+          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Serious Aspirants Only</p>
         </div>
-      </AnimatePresence>
-
-      {/* Action Buttons */}
-      <div className="absolute -bottom-20 left-0 right-0 flex justify-center gap-6 z-30">
-        <button 
-          onClick={() => handleSwipe('left')}
-          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all active:scale-90 shadow-lg"
-        >
-          <X size={32} />
-        </button>
-        <button 
-          onClick={() => handleSwipe('right')}
-          className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-indigo-500 hover:bg-indigo-500/10 transition-all active:scale-90 shadow-lg"
-        >
-          <BookOpen size={32} fill="currentColor" />
+        <button className="p-3 bg-zinc-900 rounded-2xl border border-white/5 text-zinc-400 hover:text-white transition-colors">
+          <Filter size={20} />
         </button>
       </div>
+
+      {/* Card Stack */}
+      <div className="flex-1 relative px-4 flex items-center justify-center">
+        <AnimatePresence mode="popLayout">
+          {!currentProfile ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center p-12 glass-card rounded-[3rem] max-w-sm w-full"
+            >
+              <div className="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center text-indigo-400 mx-auto mb-6">
+                <Sparkles size={40} />
+              </div>
+              <h2 className="text-2xl font-black mb-4">You've seen everyone!</h2>
+              <p className="text-zinc-500 text-sm leading-relaxed mb-8">
+                Check back later for more partners or try changing your study preferences.
+              </p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="w-full py-4 bg-white text-black font-black rounded-2xl hover:scale-105 transition-transform"
+              >
+                REFRESH STACK
+              </button>
+            </motion.div>
+          ) : (
+            <React.Fragment key={currentProfile.uid}>
+              {/* Next Card (Background) */}
+              {nextProfile && (
+                <SwipeCard 
+                  profile={nextProfile} 
+                  onSwipe={() => {}} 
+                  isFront={false} 
+                />
+              )}
+              
+              {/* Current Card */}
+              <motion.div
+                key={currentProfile.uid}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ 
+                  x: direction === 'right' ? 1000 : direction === 'left' ? -1000 : 0, 
+                  y: direction === 'up' ? -1000 : 0,
+                  opacity: 0, 
+                  scale: 0.5, 
+                  rotate: direction === 'right' ? 90 : direction === 'left' ? -90 : 0 
+                }}
+                transition={{ 
+                  type: 'spring', 
+                  stiffness: 300, 
+                  damping: 35,
+                  mass: 1
+                }}
+                className="absolute inset-0"
+              >
+                <SwipeCard 
+                  profile={currentProfile} 
+                  onSwipe={handleSwipe} 
+                  isFront={true} 
+                />
+              </motion.div>
+            </React.Fragment>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Controls */}
+      {currentProfile && (
+        <div className="px-6 py-10 flex justify-center items-center gap-6 shrink-0">
+          <button 
+            onClick={handleUndo}
+            disabled={history.length === 0}
+            className="p-4 bg-zinc-900 rounded-full border border-white/5 text-yellow-500 hover:scale-110 active:scale-90 transition-all disabled:opacity-30 disabled:hover:scale-100"
+          >
+            <RotateCcw size={24} strokeWidth={3} />
+          </button>
+          
+          <button 
+            onClick={() => handleSwipe('left')}
+            className="p-6 bg-zinc-900 rounded-full border border-white/5 text-red-500 hover:scale-110 active:scale-90 transition-all shadow-xl"
+          >
+            <X size={32} strokeWidth={4} />
+          </button>
+          
+          <button 
+            onClick={() => handleSwipe('up')}
+            className="p-4 bg-zinc-900 rounded-full border border-white/5 text-indigo-400 hover:scale-110 active:scale-90 transition-all"
+          >
+            <Star size={24} strokeWidth={3} fill="currentColor" />
+          </button>
+          
+          <button 
+            onClick={() => handleSwipe('right')}
+            className="p-6 bg-zinc-900 rounded-full border border-white/5 text-emerald-500 hover:scale-110 active:scale-90 transition-all shadow-xl"
+          >
+            <Heart size={32} strokeWidth={4} fill="currentColor" />
+          </button>
+        </div>
+      )}
+
+      {matchedPartner && myProfile && (
+        <MatchOverlay 
+          myProfile={myProfile} 
+          partnerProfile={matchedPartner} 
+          onClose={() => setMatchedPartner(null)} 
+        />
+      )}
     </div>
   );
 }

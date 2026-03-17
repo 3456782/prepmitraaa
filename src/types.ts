@@ -11,6 +11,9 @@ export interface UserProfile {
   goals: string[];
   language: string;
   city: string;
+  bio?: string;
+  consistency?: number;
+  matchScore?: number;
   streak: number;
   totalStudyHours: number;
   lastStudyDate?: string;

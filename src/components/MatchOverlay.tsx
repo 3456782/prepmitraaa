@@ -81,12 +81,12 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <h2 className="text-6xl font-black mb-4 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent italic tracking-tighter">
+        <h2 className="text-7xl font-black mb-4 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent italic tracking-tighter leading-tight">
           IT'S A MATCH!
         </h2>
         
-        <p className="text-zinc-400 text-lg mb-12 max-w-xs mx-auto leading-relaxed">
-          You and <span className="text-white font-bold">{partnerProfile.name}</span> are now study partners. Ready to crush those goals?
+        <p className="text-zinc-400 text-xl mb-12 max-w-xs mx-auto leading-relaxed font-medium">
+          You and <span className="text-white font-black">{partnerProfile.name}</span> are now study partners. Ready to crush those goals?
         </p>
       </motion.div>
 
