@@ -16,7 +16,9 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
   const springX = useSpring(x, { stiffness: 300, damping: 30, mass: 0.8 });
   const springY = useSpring(y, { stiffness: 300, damping: 30, mass: 0.8 });
   
-  const rotate = useTransform(springX, [-200, 200], [-25, 25]);
+  const rotate = useTransform(springX, [-200, 200], [-20, 20]);
+  const rotateX = useTransform(springY, [-300, 300], [10, -10]);
+  const rotateY = useTransform(springX, [-300, 300], [-10, 10]);
   const opacity = useTransform(springX, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
   const scale = useTransform(springX, [-150, 0, 150], [0.95, 1, 0.95]);
   
@@ -28,6 +30,8 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
   const likeScale = useTransform(springX, [40, 120], [0.5, 1.2]);
   const nopeScale = useTransform(springX, [-40, -120], [0.5, 1.2]);
   const superScale = useTransform(springY, [-40, -120], [0.5, 1.2]);
+  
+  const perspective = 1000;
 
   const handleDragEnd = (_: any, info: any) => {
     const threshold = 100;
@@ -56,7 +60,7 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
   const randomLine = motivationalLines[Math.abs(profile.uid.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % motivationalLines.length];
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none" style={{ perspective }}>
       <motion.div
         drag={isFront ? true : false}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -65,10 +69,13 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
           x: springX, 
           y: springY,
           rotate, 
+          rotateX,
+          rotateY,
           opacity,
           scale: isFront ? scale : 0.9,
           zIndex: isFront ? 10 : 0,
           filter: isFront ? 'none' : 'blur(2px)',
+          transformStyle: 'preserve-3d'
         }}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: 'grabbing', scale: 1.02 }}
