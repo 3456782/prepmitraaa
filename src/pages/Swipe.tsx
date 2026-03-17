@@ -44,7 +44,7 @@ export default function Swipe() {
       const swipedUserIds = matchesSnapshot.docs
         .filter(d => {
           const data = d.data();
-          return data.status === 'accepted' || data.initiator === auth.currentUser?.uid;
+          return data.status === 'accepted' || data.status === 'rejected' || data.initiator === auth.currentUser?.uid;
         })
         .flatMap(d => d.data().users)
         .filter(id => id !== auth.currentUser?.uid);
@@ -120,78 +120,91 @@ export default function Swipe() {
     fetchProfiles();
   }, []);
 
-  const handleSwipe = async (swipeDir: 'left' | 'right') => {
+  const handleSwipe = (swipeDir: 'left' | 'right') => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
     setDirection(swipeDir);
-    console.log(`[SWIPE] ${swipeDir} on:`, currentProfile.name, `(UID: ${currentProfile.uid})`);
     
-    if (swipeDir === 'right' && auth.currentUser) {
-      if (!myProfile) {
-        console.error('[SWIPE] My profile not loaded, cannot create match');
-        return;
-      }
-
+    // Background Firestore update
+    if (auth.currentUser && myProfile) {
       const myUid = auth.currentUser.uid;
       const targetUid = currentProfile.uid;
       const matchId = [myUid, targetUid].sort().join('_');
-      
-      console.log('[SWIPE] Match ID:', matchId);
-      
       const matchRef = doc(db, 'matches', matchId);
-      try {
-        const matchDoc = await getDoc(matchRef);
 
-        if (matchDoc.exists()) {
-          const data = matchDoc.data();
-          console.log('[SWIPE] Existing match found:', data);
-                    if (data.initiator !== myUid && data.status === 'pending') {
-            console.log('[SWIPE] Mutual match! Updating to accepted.');
-            await updateDoc(matchRef, {
-              status: 'accepted',
-              updatedAt: serverTimestamp()
-            });
-            setMatchedPartner(currentProfile);
+      (async () => {
+        try {
+          const matchDoc = await getDoc(matchRef);
+          if (swipeDir === 'right') {
+            if (matchDoc.exists()) {
+              const data = matchDoc.data();
+              if (data.initiator !== myUid && data.status === 'pending') {
+                await updateDoc(matchRef, {
+                  status: 'accepted',
+                  updatedAt: serverTimestamp()
+                });
+                setMatchedPartner(currentProfile);
 
-            await addDoc(collection(db, 'notifications'), {
-              userId: targetUid,
-              title: 'New Match!',
-              message: `${myProfile.name} accepted your study request! Start chatting now.`,
-              type: 'match',
-              read: false,
-              createdAt: serverTimestamp()
-            });
+                await addDoc(collection(db, 'notifications'), {
+                  userId: targetUid,
+                  title: 'New Match!',
+                  message: `${myProfile.name} accepted your study request! Start chatting now.`,
+                  type: 'match',
+                  read: false,
+                  createdAt: serverTimestamp()
+                });
+              }
+            } else {
+              await setDoc(matchRef, {
+                id: matchId,
+                users: [myUid, targetUid].sort(),
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                initiator: myUid,
+              });
+
+              await addDoc(collection(db, 'notifications'), {
+                userId: targetUid,
+                title: 'Study Request',
+                message: `${myProfile.name} wants to be your study partner!`,
+                type: 'match',
+                read: false,
+                createdAt: serverTimestamp()
+              });
+            }
           } else {
-            console.log('[SWIPE] Already liked or already matched.');
+            // Handle Left Swipe (Reject)
+            if (matchDoc.exists()) {
+              await updateDoc(matchRef, {
+                status: 'rejected',
+                updatedAt: serverTimestamp(),
+                rejectedBy: myUid
+              });
+            } else {
+              await setDoc(matchRef, {
+                id: matchId,
+                users: [myUid, targetUid].sort(),
+                status: 'rejected',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                initiator: myUid,
+                rejectedBy: myUid
+              });
+            }
           }
-        } else {
-          console.log('[SWIPE] Creating new pending match.');
-          await setDoc(matchRef, {
-            id: matchId,
-            users: [myUid, targetUid].sort(),
-            status: 'pending',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            initiator: myUid,
-          });
-
-          await addDoc(collection(db, 'notifications'), {
-            userId: targetUid,
-            title: 'Study Request',
-            message: `${myProfile.name} wants to be your study partner!`,
-            type: 'match',
-            read: false,
-            createdAt: serverTimestamp()
-          });
+        } catch (error) {
+          console.error('[SWIPE] Firestore Error:', error);
         }
-      } catch (error) {
-        console.error('[SWIPE] Firestore Error:', error);
-        handleFirestoreError(error, OperationType.WRITE, `matches/${matchId}`);
-      }
+      })();
     }
     
-    setCurrentIndex(prev => prev + 1);
+    // Immediate UI update for smoothness
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+      setDirection(null);
+    }, 250);
   };
 
   if (loading) {
@@ -247,15 +260,16 @@ export default function Swipe() {
                     zIndex: isFront ? 10 : 0
                   }}
                   exit={{ 
-                    x: direction === 'right' ? 500 : -500, 
+                    x: direction === 'right' ? 1000 : -1000, 
                     opacity: 0, 
                     scale: 0.5, 
-                    rotate: direction === 'right' ? 45 : -45 
+                    rotate: direction === 'right' ? 90 : -90 
                   }}
                   transition={{ 
                     type: 'spring', 
-                    stiffness: 260, 
-                    damping: 20 
+                    stiffness: 300, 
+                    damping: 35,
+                    mass: 1
                   }}
                   className="absolute inset-0"
                 >
