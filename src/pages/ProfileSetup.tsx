@@ -19,7 +19,7 @@ export default function ProfileSetup() {
   });
   const navigate = useNavigate();
 
-  const exams = ['SSC', 'UPSC', 'Railway', 'Banking', 'GATE', 'State Exams'];
+  const exams = ['SSC', 'UPSC', 'Railway', 'Banking', 'GATE', 'JEE', 'NEET', 'State Exams'];
   const languages = ['English', 'Hindi', 'Bengali', 'Marathi', 'Telugu', 'Tamil', 'Other'];
 
   const handleSubmit = async () => {

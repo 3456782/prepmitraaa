@@ -9,7 +9,7 @@
         "name": { "type": "string" },
         "email": { "type": "string" },
         "photoURL": { "type": "string" },
-        "exam": { "type": "string", "description": "SSC, UPSC, Railway, Banking, GATE, State" },
+        "exam": { "type": "string", "description": "SSC, UPSC, Railway, Banking, GATE, JEE, NEET, State" },
         "subjects": { "type": "array", "items": { "type": "string" } },
         "studyHoursStart": { "type": "string" },
         "studyHoursEnd": { "type": "string" },
