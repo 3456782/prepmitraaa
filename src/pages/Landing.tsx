@@ -107,7 +107,7 @@ export default function Landing() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-12 md:pt-20 overflow-hidden">
         <motion.div 
           style={{ y: y1, opacity }}
           className="relative z-10 max-w-7xl mx-auto text-center"
@@ -116,7 +116,7 @@ export default function Landing() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-6 md:mb-8 mt-10 md:mt-0 text-[10px] font-black tracking-[0.2em] text-teal-electric uppercase bg-teal-electric/5 rounded-full border border-teal-electric/20 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-2 mb-4 md:mb-8 text-[10px] font-black tracking-[0.2em] text-teal-electric uppercase bg-teal-electric/5 rounded-full border border-teal-electric/20 backdrop-blur-md"
           >
             <Sparkles size={12} /> The Future of Collaborative Learning
           </motion.div>
@@ -172,7 +172,7 @@ export default function Landing() {
           <motion.div 
             animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[12%] left-4 md:left-20 lg:top-1/4"
+            className="absolute top-[10%] left-4 md:left-20 lg:top-1/4"
           >
             <div className="glass-card p-3 md:p-4 rounded-2xl border-teal-electric/20 shadow-2xl scale-75 md:scale-100 origin-left">
               <div className="flex items-center gap-3">
