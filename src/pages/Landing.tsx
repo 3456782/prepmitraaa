@@ -116,7 +116,7 @@ export default function Landing() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-[10px] font-black tracking-[0.2em] text-teal-electric uppercase bg-teal-electric/5 rounded-full border border-teal-electric/20 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-2 mb-6 md:mb-8 mt-10 md:mt-0 text-[10px] font-black tracking-[0.2em] text-teal-electric uppercase bg-teal-electric/5 rounded-full border border-teal-electric/20 backdrop-blur-md"
           >
             <Sparkles size={12} /> The Future of Collaborative Learning
           </motion.div>
@@ -125,7 +125,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-6xl md:text-[120px] font-black mb-8 tracking-tighter leading-[0.85] uppercase"
+            className="text-5xl md:text-[120px] font-black mb-8 tracking-tighter leading-[0.9] md:leading-[0.85] uppercase"
           >
             Study <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-electric via-cyan-400 to-indigo-500">
@@ -137,7 +137,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+            className="text-base md:text-xl text-zinc-400 mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed font-medium px-4 md:px-0"
           >
             Stop studying in isolation. Connect with the perfect study partner, 
             track your progress with precision, and master your exams together.
@@ -147,20 +147,20 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 px-6 md:px-0"
           >
             <Link 
               to="/auth" 
-              className="group relative px-10 py-5 bg-teal-electric text-navy-deep font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(0,212,255,0.3)]"
+              className="w-full sm:w-auto group relative px-10 py-5 bg-teal-electric text-navy-deep font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(0,212,255,0.3)]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-teal-electric to-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="relative flex items-center gap-3 uppercase tracking-wider text-sm">
+              <span className="relative flex items-center justify-center gap-3 uppercase tracking-wider text-sm">
                 Get Started Now <ArrowRight size={18} strokeWidth={3} />
               </span>
             </Link>
             <button 
               onClick={() => setShowDemo(true)}
-              className="px-10 py-5 bg-white/5 text-zinc-300 font-black rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3 uppercase tracking-wider text-sm backdrop-blur-xl"
+              className="w-full sm:w-auto px-10 py-5 bg-white/5 text-zinc-300 font-black rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3 uppercase tracking-wider text-sm backdrop-blur-xl"
             >
               <Play size={18} fill="currentColor" /> Watch Demo
             </button>
@@ -170,36 +170,36 @@ export default function Landing() {
         {/* Floating UI Elements for Hero */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <motion.div 
-            animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
+            animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-10 md:left-20 hidden lg:block"
+            className="absolute top-[12%] left-4 md:left-20 lg:top-1/4"
           >
-            <div className="glass-card p-4 rounded-2xl border-teal-electric/20 shadow-2xl">
+            <div className="glass-card p-3 md:p-4 rounded-2xl border-teal-electric/20 shadow-2xl scale-75 md:scale-100 origin-left">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-teal-electric/20 rounded-xl flex items-center justify-center text-teal-electric">
-                  <Zap size={20} />
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-teal-electric/20 rounded-xl flex items-center justify-center text-teal-electric">
+                  <Zap size={16} className="md:w-5 md:h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-black text-zinc-500 uppercase">Daily Streak</div>
-                  <div className="text-sm font-black text-white">14 Days</div>
+                  <div className="text-[8px] md:text-[10px] font-black text-zinc-500 uppercase">Daily Streak</div>
+                  <div className="text-xs md:text-sm font-black text-white">14 Days</div>
                 </div>
               </div>
             </div>
           </motion.div>
 
           <motion.div 
-            animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
+            animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-1/4 right-10 md:right-20 hidden lg:block"
+            className="absolute bottom-[12%] right-4 md:right-20 lg:bottom-1/4"
           >
-            <div className="glass-card p-4 rounded-2xl border-indigo-500/20 shadow-2xl">
+            <div className="glass-card p-3 md:p-4 rounded-2xl border-indigo-500/20 shadow-2xl scale-75 md:scale-100 origin-right">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
-                  <Users size={20} />
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
+                  <Users size={16} className="md:w-5 md:h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-black text-zinc-500 uppercase">Partner Found</div>
-                  <div className="text-sm font-black text-white">Match #24</div>
+                  <div className="text-[8px] md:text-[10px] font-black text-zinc-500 uppercase">Partner Found</div>
+                  <div className="text-xs md:text-sm font-black text-white">Match #24</div>
                 </div>
               </div>
             </div>
