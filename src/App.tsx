@@ -14,7 +14,6 @@ import Swipe from './pages/Swipe';
 import Chats from './pages/Chats';
 import Profile from './pages/Profile';
 import Progress from './pages/Progress';
-import Leaderboard from './pages/Leaderboard';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 
@@ -40,8 +39,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-navy-deep flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal-electric border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -71,10 +70,6 @@ export default function App() {
               <Route 
                 path="/chats" 
                 element={user ? (hasProfile ? <Chats /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
-              />
-              <Route 
-                path="/leaderboard" 
-                element={user ? (hasProfile ? <Leaderboard /> : <Navigate to="/setup" />) : <Navigate to="/auth" />} 
               />
               <Route 
                 path="/profile" 

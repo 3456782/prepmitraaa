@@ -242,7 +242,7 @@ export default function Swipe() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center p-12 glass-card rounded-[3rem] max-w-sm w-full"
             >
-              <div className="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center text-indigo-400 mx-auto mb-6">
+              <div className="w-20 h-20 bg-teal-electric/10 rounded-full flex items-center justify-center text-teal-electric mx-auto mb-6">
                 <Sparkles size={40} />
               </div>
               <h2 className="text-2xl font-black mb-4">You've seen everyone!</h2>
@@ -251,7 +251,7 @@ export default function Swipe() {
               </p>
               <button 
                 onClick={() => window.location.reload()}
-                className="w-full py-4 bg-white text-black font-black rounded-2xl hover:scale-105 transition-transform"
+                className="w-full py-4 bg-teal-electric text-navy-deep font-black rounded-2xl hover:scale-105 transition-transform"
               >
                 REFRESH STACK
               </button>
@@ -318,7 +318,7 @@ export default function Swipe() {
           
           <button 
             onClick={() => handleSwipe('up')}
-            className="p-4 bg-zinc-900 rounded-full border border-white/5 text-indigo-400 hover:scale-110 active:scale-90 transition-all"
+            className="p-4 bg-zinc-900 rounded-full border border-white/5 text-teal-electric hover:scale-110 active:scale-90 transition-all"
           >
             <Star size={24} strokeWidth={3} fill="currentColor" />
           </button>

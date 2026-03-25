@@ -44,8 +44,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden">
       {/* Background Orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 rounded-full blur-[120px]" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-teal-electric/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-teal-electric/10 rounded-full blur-[120px]" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -53,7 +53,7 @@ export default function Auth() {
         className="glass-card w-full max-w-md p-10 relative z-10"
       >
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl mx-auto mb-6 shadow-xl shadow-indigo-600/20">P</div>
+          <div className="w-16 h-16 bg-teal-electric rounded-2xl flex items-center justify-center font-black text-2xl mx-auto mb-6 shadow-xl shadow-teal-electric/20 text-navy-deep">P</div>
           <h2 className="text-3xl font-black mb-2">{isLogin ? 'Welcome Back' : 'Join PrepMitra'}</h2>
           <p className="text-zinc-500 font-medium">
             {isLogin ? 'Start studying with your partners' : 'Create an account to find study partners'}
@@ -79,7 +79,7 @@ export default function Auth() {
             <input 
               type="email" 
               placeholder="Email address"
-              className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all"
+              className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-teal-electric outline-none transition-all"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -90,7 +90,7 @@ export default function Auth() {
             <input 
               type="password" 
               placeholder="Password"
-              className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-indigo-500 outline-none transition-all"
+              className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-teal-electric outline-none transition-all"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -101,7 +101,7 @@ export default function Auth() {
 
           <button 
             type="submit"
-            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
+            className="w-full py-4 bg-teal-electric text-navy-deep font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-teal-electric/90 transition-all active:scale-95 shadow-lg shadow-teal-electric/20"
           >
             {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight size={20} />
           </button>
@@ -110,7 +110,7 @@ export default function Auth() {
         <div className="mt-8 text-center">
           <button 
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm font-bold text-zinc-500 hover:text-indigo-400 transition-colors"
+            className="text-sm font-bold text-zinc-500 hover:text-teal-electric transition-colors"
           >
             {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
           </button>

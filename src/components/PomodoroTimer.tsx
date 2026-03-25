@@ -98,7 +98,7 @@ export default function PomodoroTimer() {
     <div className="glass-card p-8 text-center relative overflow-hidden group">
       <div className="absolute top-0 left-0 w-full h-1 bg-zinc-800">
         <div 
-          className="h-full bg-indigo-500 transition-all duration-1000" 
+          className="h-full bg-teal-electric transition-all duration-1000 shadow-[0_0_10px_rgba(0,212,255,0.5)]" 
           style={{ width: `${((isBreak ? 5*60 : 25*60) - (minutes*60 + seconds)) / (isBreak ? 5*60 : 25*60) * 100}%` }}
         />
       </div>
@@ -107,7 +107,7 @@ export default function PomodoroTimer() {
         {isBreak ? (
           <Coffee className="text-emerald-400" size={20} />
         ) : (
-          <Brain className="text-indigo-400" size={20} />
+          <Brain className="text-teal-electric" size={20} />
         )}
         <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
           {isBreak ? 'Break Time' : 'Focus Session'}
@@ -124,7 +124,7 @@ export default function PomodoroTimer() {
           className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg ${
             isActive 
             ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700' 
-            : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20'
+            : 'bg-teal-electric text-navy-deep hover:bg-teal-electric/90 shadow-teal-electric/20'
           }`}
         >
           {isActive ? <Pause size={28} fill="currentColor" /> : <Play size={28} className="ml-1" fill="currentColor" />}

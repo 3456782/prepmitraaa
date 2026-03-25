@@ -40,7 +40,7 @@ export default function ProfileSetup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[120px]" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-teal-electric/10 rounded-full blur-[120px]" />
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
@@ -54,7 +54,7 @@ export default function ProfileSetup() {
           </div>
           <div className="flex gap-2">
             {[1, 2, 3].map((s) => (
-              <div key={s} className={`w-10 h-1.5 rounded-full transition-all ${step >= s ? 'bg-indigo-500' : 'bg-zinc-800'}`} />
+              <div key={s} className={`w-10 h-1.5 rounded-full transition-all ${step >= s ? 'bg-teal-electric' : 'bg-zinc-800'}`} />
             ))}
           </div>
         </div>
@@ -67,7 +67,7 @@ export default function ProfileSetup() {
                   <User size={14} /> Full Name
                 </label>
                 <input 
-                  className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-teal-electric outline-none transition-all"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
@@ -77,7 +77,7 @@ export default function ProfileSetup() {
                   <MapPin size={14} /> City
                 </label>
                 <input 
-                  className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-teal-electric outline-none transition-all"
                   placeholder="e.g. Delhi"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
@@ -95,7 +95,7 @@ export default function ProfileSetup() {
                     onClick={() => setFormData({...formData, exam})}
                     className={`py-4 px-4 rounded-2xl border font-bold transition-all ${
                       formData.exam === exam 
-                      ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' 
+                      ? 'bg-teal-electric border-teal-electric text-navy-deep shadow-lg shadow-teal-electric/20' 
                       : 'bg-zinc-950/50 border-white/5 text-zinc-500 hover:border-white/20'
                     }`}
                   >
@@ -118,7 +118,7 @@ export default function ProfileSetup() {
                   <span className="text-xs font-bold text-zinc-600">Start Time</span>
                   <input 
                     type="time"
-                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-teal-electric outline-none transition-all"
                     value={formData.studyHoursStart}
                     onChange={(e) => setFormData({...formData, studyHoursStart: e.target.value})}
                   />
@@ -127,7 +127,7 @@ export default function ProfileSetup() {
                   <span className="text-xs font-bold text-zinc-600">End Time</span>
                   <input 
                     type="time"
-                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950/50 border border-white/10 rounded-2xl py-4 px-6 focus:border-teal-electric outline-none transition-all"
                     value={formData.studyHoursEnd}
                     onChange={(e) => setFormData({...formData, studyHoursEnd: e.target.value})}
                   />
@@ -140,11 +140,11 @@ export default function ProfileSetup() {
               </label>
               <input 
                 type="range" min="1" max="16"
-                className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-electric"
                 value={formData.dailyTarget}
                 onChange={(e) => setFormData({...formData, dailyTarget: parseInt(e.target.value)})}
               />
-              <div className="text-center font-black text-3xl text-indigo-400">{formData.dailyTarget} Hours</div>
+              <div className="text-center font-black text-3xl text-teal-electric">{formData.dailyTarget} Hours</div>
             </div>
           </motion.div>
         )}
@@ -162,7 +162,7 @@ export default function ProfileSetup() {
                     onClick={() => setFormData({...formData, language: lang})}
                     className={`py-3 px-4 rounded-xl border font-bold text-sm transition-all ${
                       formData.language === lang 
-                      ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' 
+                      ? 'bg-teal-electric border-teal-electric text-navy-deep shadow-lg shadow-teal-electric/20' 
                       : 'bg-zinc-950/50 border-white/5 text-zinc-500 hover:border-white/20'
                     }`}
                   >
@@ -171,8 +171,8 @@ export default function ProfileSetup() {
                 ))}
               </div>
             </div>
-            <div className="p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl">
-              <h4 className="font-bold text-indigo-400 mb-2">Ready to match!</h4>
+            <div className="p-6 bg-teal-electric/10 border border-teal-electric/20 rounded-3xl">
+              <h4 className="font-bold text-teal-electric mb-2">Ready to match!</h4>
               <p className="text-sm text-zinc-400">We'll use these details to find the best study partners for you. You can change these anytime in your profile.</p>
             </div>
           </motion.div>
@@ -189,7 +189,7 @@ export default function ProfileSetup() {
           )}
           <button 
             onClick={step === 3 ? handleSubmit : () => setStep(step + 1)}
-            className="flex-[2] py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
+            className="flex-[2] py-4 bg-teal-electric text-navy-deep font-bold rounded-2xl hover:bg-teal-electric/90 transition-all active:scale-95 shadow-lg shadow-teal-electric/20"
           >
             {step === 3 ? 'Finish Setup' : 'Continue'}
           </button>

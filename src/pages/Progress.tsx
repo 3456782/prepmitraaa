@@ -27,7 +27,6 @@ import {
   X
 } from 'lucide-react';
 import { Topic, PracticeTest, UserProfile } from '../types';
-import { BADGES } from '../constants/badges';
 import { 
   LineChart, 
   Line, 
@@ -153,13 +152,13 @@ export default function Progress() {
         <div className="flex gap-4">
           <button 
             onClick={() => setShowTopicModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
+            className="flex items-center gap-2 px-6 py-3 bg-teal-electric text-navy-deep font-bold rounded-2xl hover:bg-teal-electric/90 transition-all shadow-lg shadow-teal-electric/20"
           >
             <Plus size={20} /> Add Topic
           </button>
           <button 
             onClick={() => setShowTestModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white font-bold rounded-2xl border border-white/5 hover:bg-zinc-800 transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-white/5 text-white font-bold rounded-2xl border border-white/5 hover:bg-white/10 transition-all"
           >
             <PlusCircle size={20} /> Log Test
           </button>
@@ -172,7 +171,7 @@ export default function Progress() {
           <div className="glass-card p-8">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-bold flex items-center gap-2">
-                <BookOpen className="text-indigo-400" size={20} /> Topics Overview
+                <BookOpen className="text-teal-electric" size={20} /> Topics Overview
               </h3>
               <div className="text-sm font-bold text-zinc-500 uppercase tracking-widest">
                 {completedCount} / {topics.length} Completed
@@ -183,7 +182,7 @@ export default function Progress() {
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-purple-600 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-teal-electric to-blue-600 shadow-[0_0_20px_rgba(0,212,255,0.4)]"
               />
             </div>
 
@@ -198,14 +197,14 @@ export default function Progress() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     className={`p-4 rounded-2xl border transition-all flex items-center justify-between group ${
                       topic.completed 
-                      ? 'bg-indigo-500/5 border-indigo-500/20' 
+                      ? 'bg-teal-electric/5 border-teal-electric/20' 
                       : 'bg-zinc-950/50 border-white/5 hover:border-white/20'
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <button 
                         onClick={() => toggleTopic(topic)}
-                        className={`transition-colors ${topic.completed ? 'text-indigo-400' : 'text-zinc-600 hover:text-zinc-400'}`}
+                        className={`transition-colors ${topic.completed ? 'text-teal-electric' : 'text-zinc-600 hover:text-zinc-400'}`}
                       >
                         {topic.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
                       </button>
@@ -329,76 +328,6 @@ export default function Progress() {
             </div>
           </div>
         </div>
-
-        {/* Badges Progress */}
-        <div className="glass-card p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <Award className="text-indigo-400" size={20} /> Badge Milestones
-            </h3>
-            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">
-              {profile?.badges?.length || 0} / {BADGES.length} Earned
-            </span>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {BADGES.map((badge) => {
-              const isEarned = profile?.badges?.includes(badge.id);
-              const Icon = badge.icon;
-              
-              // Calculate progress for specific badges
-              let progress = 0;
-              let targetValue = 0;
-              let currentValue = 0;
-              let unit = '';
-
-              if (badge.id.startsWith('streak_')) {
-                targetValue = parseInt(badge.id.split('_')[1]);
-                currentValue = profile?.streak || 0;
-                unit = 'days';
-              } else if (badge.id.startsWith('hours_')) {
-                targetValue = parseInt(badge.id.split('_')[1]);
-                currentValue = profile?.totalStudyHours || 0;
-                unit = 'hours';
-              }
-
-              progress = targetValue > 0 ? Math.min(100, Math.round((currentValue / targetValue) * 100)) : (isEarned ? 100 : 0);
-
-              return (
-                <div key={badge.id} className={`p-6 rounded-2xl border transition-all ${isEarned ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-zinc-950/50 border-white/5'}`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${isEarned ? 'bg-indigo-500/10' : 'bg-zinc-900'}`}>
-                      <Icon size={24} className={isEarned ? badge.color : 'text-zinc-600'} />
-                    </div>
-                    {isEarned && (
-                      <div className="bg-indigo-500 text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md text-white">
-                        Earned
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="font-bold text-sm mb-1">{badge.name}</h4>
-                  <p className="text-[10px] text-zinc-500 leading-tight mb-4">{badge.description}</p>
-                  
-                  {!isEarned && targetValue > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
-                        <span className="text-zinc-500">{currentValue} / {targetValue} {unit}</span>
-                        <span className="text-indigo-400">{progress}%</span>
-                      </div>
-                      <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          className="h-full bg-indigo-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       {/* Topic Modal */}
@@ -428,7 +357,7 @@ export default function Progress() {
                   <input 
                     autoFocus
                     required
-                    className="w-full bg-zinc-950 border border-white/10 rounded-xl py-3 px-4 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950 border border-white/10 rounded-xl py-3 px-4 focus:border-teal-electric outline-none transition-all"
                     placeholder="e.g. Thermodynamics"
                     value={newTopic.name}
                     onChange={e => setNewTopic({...newTopic, name: e.target.value})}
@@ -438,13 +367,13 @@ export default function Progress() {
                   <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Subject</label>
                   <input 
                     required
-                    className="w-full bg-zinc-950 border border-white/10 rounded-xl py-3 px-4 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950 border border-white/10 rounded-xl py-3 px-4 focus:border-teal-electric outline-none transition-all"
                     placeholder="e.g. Physics"
                     value={newTopic.subject}
                     onChange={e => setNewTopic({...newTopic, subject: e.target.value})}
                   />
                 </div>
-                <button className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20">
+                <button className="w-full py-4 bg-teal-electric text-navy-deep font-bold rounded-xl hover:bg-teal-electric/90 transition-all shadow-lg shadow-teal-electric/20">
                   Add to List
                 </button>
               </form>

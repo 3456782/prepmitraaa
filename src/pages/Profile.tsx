@@ -132,14 +132,14 @@ export default function Profile() {
                 />
                 {isUploading && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-teal-electric animate-spin" />
                   </div>
                 )}
               </div>
               <button 
                 onClick={handleImageClick}
                 disabled={isUploading}
-                className="absolute bottom-0 right-0 p-3 bg-indigo-600 text-white rounded-2xl shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                className="absolute bottom-0 right-0 p-3 bg-teal-electric text-navy-deep rounded-2xl shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
               >
                 <Camera size={18} />
               </button>

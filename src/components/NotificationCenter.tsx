@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Bell, X, Info, Flame, MessageSquare, UserPlus } from 'lucide-react';
 import { Notification } from '../types';
 
-export default function NotificationCenter() {
+export default function NotificationCenter({ position = 'right' }: { position?: 'left' | 'right' }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -53,6 +53,14 @@ export default function NotificationCenter() {
     await Promise.all(promises);
   };
 
+  const clearAll = async () => {
+    const promises = notifications.map(n => 
+      deleteDoc(doc(db, 'notifications', n.id))
+    );
+    await Promise.all(promises);
+    setIsOpen(false);
+  };
+
   useEffect(() => {
     if (isOpen && unreadCount > 0) {
       markAllAsRead();
@@ -66,9 +74,9 @@ export default function NotificationCenter() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'streak_reset': return <Flame className="text-orange-500" size={18} />;
-      case 'match': return <UserPlus className="text-indigo-500" size={18} />;
-      case 'message': return <MessageSquare className="text-emerald-500" size={18} />;
-      default: return <Info className="text-blue-500" size={18} />;
+      case 'match': return <UserPlus className="text-teal-electric" size={18} />;
+      case 'message': return <MessageSquare className="text-teal-electric" size={18} />;
+      default: return <Info className="text-teal-electric" size={18} />;
     }
   };
 
@@ -76,13 +84,23 @@ export default function NotificationCenter() {
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-zinc-400 hover:text-white transition-colors"
+        className={`relative p-2.5 rounded-xl transition-all duration-300 group ${
+          isOpen 
+          ? 'bg-teal-electric text-navy-deep shadow-lg shadow-teal-electric/20' 
+          : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/5'
+        }`}
       >
-        <Bell size={24} />
+        <Bell size={18} className={isOpen ? '' : 'group-hover:rotate-12 transition-transform'} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-zinc-950">
+          <motion.span 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`absolute -top-1 -right-1 w-5 h-5 text-[10px] font-black flex items-center justify-center rounded-full border-2 ${
+              isOpen ? 'bg-navy-deep text-teal-electric border-teal-electric' : 'bg-teal-electric text-navy-deep border-navy-deep'
+            }`}
+          >
             {unreadCount}
-          </span>
+          </motion.span>
         )}
       </button>
 
@@ -94,40 +112,62 @@ export default function NotificationCenter() {
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 mt-4 w-80 bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl z-50 overflow-hidden"
+              initial={{ opacity: 0, y: 10, scale: 0.95, x: position === 'left' ? 20 : 0 }}
+              animate={{ opacity: 1, y: 0, scale: 1, x: position === 'left' ? 20 : 0 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95, x: position === 'left' ? 20 : 0 }}
+              className={`absolute mt-4 w-80 bg-navy-deep/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden ${
+                position === 'right' ? 'right-0' : 'left-full ml-4 top-[-20px]'
+              }`}
             >
-              <div className="p-4 border-b border-white/5 flex justify-between items-center bg-zinc-950/50">
-                <h3 className="font-bold text-sm">Notifications</h3>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="text-zinc-500 hover:text-white"
-                >
-                  <X size={16} />
-                </button>
+              <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5">
+                <div>
+                  <h3 className="font-black text-sm tracking-tight">Notifications</h3>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Stay Updated</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={clearAll}
+                      className="text-[10px] font-black text-zinc-500 hover:text-red-400 uppercase tracking-widest transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setIsOpen(false)}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-zinc-500 hover:text-white"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
 
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-zinc-600 text-sm">
-                    No notifications yet
+                  <div className="p-12 text-center space-y-3">
+                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-zinc-600 mx-auto">
+                      <Bell size={24} />
+                    </div>
+                    <p className="text-sm text-zinc-500 font-medium">All caught up!</p>
                   </div>
                 ) : (
                   notifications.map((n) => (
                     <div 
                       key={n.id}
-                      className={`p-4 border-b border-white/5 last:border-0 transition-colors hover:bg-white/5 cursor-pointer relative group ${!n.read ? 'bg-indigo-500/5' : ''}`}
+                      className={`p-5 border-b border-white/5 last:border-0 transition-all hover:bg-white/5 cursor-pointer relative group ${!n.read ? 'bg-teal-electric/5' : ''}`}
                       onClick={() => markAsRead(n.id)}
                     >
-                      <div className="flex gap-3">
-                        <div className="mt-1">{getIcon(n.type)}</div>
-                        <div className="flex-1">
-                          <h4 className={`text-sm font-bold mb-1 ${!n.read ? 'text-white' : 'text-zinc-400'}`}>
+                      <div className="flex gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          !n.read ? 'bg-teal-electric/10' : 'bg-white/5'
+                        }`}>
+                          {getIcon(n.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-sm font-bold mb-1 truncate ${!n.read ? 'text-white' : 'text-zinc-400'}`}>
                             {n.title}
                           </h4>
-                          <p className="text-xs text-zinc-500 leading-relaxed">
+                          <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
                             {n.message}
                           </p>
                         </div>
@@ -136,7 +176,7 @@ export default function NotificationCenter() {
                             e.stopPropagation();
                             deleteNotification(n.id);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-red-400 transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-600 hover:text-red-400 transition-all"
                         >
                           <X size={14} />
                         </button>

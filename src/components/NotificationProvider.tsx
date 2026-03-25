@@ -63,8 +63,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             exit={{ y: -100, opacity: 0 }}
             className="fixed top-0 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-md"
           >
-            <div className="bg-zinc-900 border border-emerald-500/30 p-4 rounded-2xl shadow-2xl flex items-center gap-4">
-              <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="bg-zinc-900 border border-teal-electric/30 p-4 rounded-2xl shadow-2xl flex items-center gap-4">
+              <div className="w-10 h-10 bg-teal-electric/10 rounded-full flex items-center justify-center text-teal-electric shrink-0">
                 <Heart size={20} fill="currentColor" />
               </div>
               <div className="flex-1">
@@ -72,7 +72,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               </div>
               <button 
                 onClick={() => navigate('/chats')}
-                className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                className="p-2 text-teal-electric hover:bg-teal-electric/10 rounded-lg transition-colors"
               >
                 <MessageSquare size={20} />
               </button>

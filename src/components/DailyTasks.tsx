@@ -85,7 +85,7 @@ export default function DailyTasks({ userId, isReadOnly = false }: DailyTasksPro
     <div className="glass-card p-8">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold flex items-center gap-2">
-          <ListTodo className="text-indigo-400" size={20} /> 
+          <ListTodo className="text-teal-electric" size={20} /> 
           {isReadOnly ? "Partner's Tasks" : "Daily Tasks"}
         </h3>
         {!isReadOnly && (
@@ -100,13 +100,13 @@ export default function DailyTasks({ userId, isReadOnly = false }: DailyTasksPro
           <input 
             type="text"
             placeholder="Add a task for today..."
-            className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2 text-sm outline-none focus:border-indigo-500 transition-all"
+            className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2 text-sm outline-none focus:border-teal-electric transition-all"
             value={newTodo}
             onChange={e => setNewTodo(e.target.value)}
           />
           <button 
             type="submit"
-            className="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all"
+            className="p-2 bg-teal-electric text-navy-deep rounded-xl hover:bg-teal-electric/90 transition-all"
           >
             <Plus size={20} />
           </button>
@@ -124,7 +124,7 @@ export default function DailyTasks({ userId, isReadOnly = false }: DailyTasksPro
               exit={{ opacity: 0, x: 10 }}
               className={`flex items-center justify-between p-3 rounded-xl border group transition-all ${
                 todo.completed 
-                ? 'bg-indigo-500/5 border-indigo-500/10' 
+                ? 'bg-teal-electric/5 border-teal-electric/10' 
                 : 'bg-zinc-950/50 border-white/5'
               }`}
             >

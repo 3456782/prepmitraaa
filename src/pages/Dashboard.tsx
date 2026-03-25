@@ -213,11 +213,11 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div id="dashboard-stats" className="grid lg:grid-cols-3 gap-8">
         {/* Main Stats */}
         <div className="lg:col-span-2 grid md:grid-cols-3 gap-6">
           <div className="glass-card p-8 flex flex-col justify-between">
-            <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 mb-6">
+            <div className="w-12 h-12 bg-teal-electric/10 rounded-2xl flex items-center justify-center text-teal-electric mb-6">
               <Timer size={24} />
             </div>
             <div>
@@ -235,7 +235,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="glass-card p-8 flex flex-col justify-between">
-            <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-6">
+            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-6">
               <Users size={24} />
             </div>
             <div>
@@ -245,12 +245,12 @@ export default function Dashboard() {
           </div>
 
           {/* Activity Chart */}
-          <div className="md:col-span-3 glass-card p-8">
+          <div id="weekly-activity" className="md:col-span-3 glass-card p-8">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-bold flex items-center gap-2">
-                <Calendar className="text-indigo-400" size={20} /> Weekly Activity
+                <Calendar className="text-teal-electric" size={20} /> Weekly Activity
               </h3>
-              <select className="bg-zinc-950 border border-white/5 rounded-xl px-4 py-2 text-sm font-bold outline-none">
+              <select className="bg-navy-deep border border-white/5 rounded-xl px-4 py-2 text-sm font-bold outline-none">
                 <option>This Week</option>
                 <option>Last Week</option>
               </select>
@@ -260,52 +260,33 @@ export default function Dashboard() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#00D4FF" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#00D4FF" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                   <XAxis dataKey="name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                    itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
+                    contentStyle={{ backgroundColor: '#0D1B2A', border: 'none', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    itemStyle={{ color: '#00D4FF', fontWeight: 'bold' }}
                   />
-                  <Area type="monotone" dataKey="hours" stroke="#6366f1" strokeWidth={4} fillOpacity={1} fill="url(#colorHours)" />
+                  <Area type="monotone" dataKey="hours" stroke="#00D4FF" strokeWidth={4} fillOpacity={1} fill="url(#colorHours)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Daily Tasks Section */}
-          <div className="md:col-span-3">
+          <div id="daily-tasks" className="md:col-span-3">
             <DailyTasks />
           </div>
         </div>
 
         {/* Pomodoro Timer Widget */}
         <div className="space-y-8">
-          <PomodoroTimer />
-          
-          {/* AI Mentor Widget */}
-          <div className="glass-card p-8 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-indigo-500/20">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white">
-                <Brain size={20} />
-              </div>
-              <div>
-                <h4 className="font-bold">AI Study Mentor</h4>
-                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Online</span>
-              </div>
-            </div>
-            <p className="text-sm text-zinc-300 leading-relaxed mb-6 italic">
-              "{profile?.totalStudyHours && profile.totalStudyHours > 0 
-                ? `You've studied for ${profile.totalStudyHours} hours in total. You're ${Math.round((profile.totalStudyHours / (profile.dailyTarget * 30)) * 100)}% through your monthly goal!`
-                : "You haven't started any study sessions yet. Let's get focused and start your first session today!"}"
-            </p>
-            <button className="w-full py-3 bg-indigo-500 text-white font-bold rounded-xl text-sm hover:bg-indigo-400 transition-all">
-              Ask for Tips
-            </button>
+          <div id="pomodoro-timer">
+            <PomodoroTimer />
           </div>
         </div>
       </div>

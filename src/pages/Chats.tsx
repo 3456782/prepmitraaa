@@ -95,7 +95,7 @@ export default function Chats() {
               <button
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
-                className={`w-full p-4 flex items-center gap-4 transition-all hover:bg-zinc-900/50 ${selectedMatch?.id === match.id ? 'bg-indigo-500/10 border-r-2 border-indigo-500' : ''}`}
+                className={`w-full p-4 flex items-center gap-4 transition-all hover:bg-zinc-900/50 ${selectedMatch?.id === match.id ? 'bg-teal-electric/10 border-r-2 border-teal-electric' : ''}`}
               >
                 <img 
                   src={match.partner.photoURL || `https://picsum.photos/seed/${match.partner.uid}/100/100`} 
@@ -128,12 +128,12 @@ export default function Chats() {
                 />
                 <div>
                   <h4 className="font-bold">{selectedMatch.partner.name}</h4>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-electric">Online</span>
                 </div>
               </div>
               <button 
                 onClick={() => setShowPartnerTasks(true)}
-                className="p-2 text-zinc-400 hover:text-indigo-400 transition-colors"
+                className="p-2 text-zinc-400 hover:text-teal-electric transition-colors"
                 title="View Partner's Tasks"
               >
                 <ListTodo size={24} />
@@ -149,7 +149,7 @@ export default function Chats() {
                   >
                     <div className={`max-w-[70%] p-4 rounded-2xl text-sm font-medium ${
                       msg.senderId === auth.currentUser?.uid 
-                      ? 'bg-indigo-600 text-white rounded-tr-none' 
+                      ? 'bg-teal-electric text-navy-deep rounded-tr-none' 
                       : 'bg-zinc-800 text-zinc-100 rounded-tl-none'
                     }`}>
                       {msg.text}

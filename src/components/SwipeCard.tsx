@@ -98,10 +98,10 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="absolute top-6 left-6 z-20 bg-indigo-500/20 backdrop-blur-md border border-indigo-500/30 px-3 py-1 rounded-full flex items-center gap-2"
+            className="absolute top-6 left-6 z-20 bg-teal-electric/20 backdrop-blur-md border border-teal-electric/30 px-3 py-1 rounded-full flex items-center gap-2"
           >
-            <Sparkles size={12} className="text-indigo-400" />
-            <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">
+            <Sparkles size={12} className="text-teal-electric" />
+            <span className="text-[9px] font-black text-teal-electric uppercase tracking-widest">
               {Math.min(100, (profile as any).matchScore)}% Match
             </span>
           </motion.div>
@@ -142,10 +142,10 @@ export default function SwipeCard({ profile, onSwipe, isFront = true }: SwipeCar
           style={{ opacity: superOpacity, scale: superScale }} 
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-4 pointer-events-none"
         >
-          <div className="bg-indigo-500 text-white p-6 rounded-full shadow-[0_0_50px_rgba(99,102,241,0.8)] border-4 border-white/20">
+          <div className="bg-teal-electric text-navy-deep p-6 rounded-full shadow-[0_0_50px_rgba(0,212,255,0.8)] border-4 border-white/20">
             <Star size={48} strokeWidth={4} fill="currentColor" />
           </div>
-          <span className="text-indigo-400 font-black text-3xl uppercase tracking-[0.3em] drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">Super Match</span>
+          <span className="text-teal-electric font-black text-3xl uppercase tracking-[0.3em] drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">Super Match</span>
         </motion.div>
 
         {/* Content */}

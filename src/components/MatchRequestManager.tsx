@@ -127,17 +127,17 @@ export default function MatchRequestManager() {
               <div className="relative inline-block mb-6">
                 <img 
                   src={pendingMatch.partner.photoURL || `https://picsum.photos/seed/${pendingMatch.partner.uid}/200/200`}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-indigo-500/30"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-teal-electric/30"
                   alt=""
                 />
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white border-4 border-zinc-900">
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-teal-electric rounded-full flex items-center justify-center text-navy-deep border-4 border-zinc-900">
                   <BookOpen size={18} fill="currentColor" />
                 </div>
               </div>
 
               <h3 className="text-2xl font-black mb-2">New Request!</h3>
               <p className="text-zinc-400 text-sm mb-8">
-                <span className="text-white font-bold">{pendingMatch.partner.name}</span> wants to be your study partner for <span className="text-indigo-400 font-bold">{pendingMatch.partner.exam}</span>.
+                <span className="text-white font-bold">{pendingMatch.partner.name}</span> wants to be your study partner for <span className="text-teal-electric font-bold">{pendingMatch.partner.exam}</span>.
               </p>
 
               <div className="flex gap-4">
@@ -149,7 +149,7 @@ export default function MatchRequestManager() {
                 </button>
                 <button
                   onClick={handleAccept}
-                  className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                  className="flex-1 py-4 bg-teal-electric text-navy-deep font-bold rounded-2xl hover:bg-teal-electric/90 transition-all shadow-lg shadow-teal-electric/20 flex items-center justify-center gap-2"
                 >
                   <Check size={20} /> Accept
                 </button>

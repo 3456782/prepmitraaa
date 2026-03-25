@@ -40,7 +40,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
               repeat: Infinity,
               delay: Math.random() * 2
             }}
-            className="absolute text-emerald-500/30"
+            className="absolute text-teal-electric/30"
           >
             <Sparkles size={Math.random() * 20 + 10} />
           </motion.div>
@@ -57,7 +57,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
             initial={{ x: -50, rotate: -10 }}
             animate={{ x: 0, rotate: -5 }}
             src={myProfile.photoURL || `https://picsum.photos/seed/${myProfile.uid}/300/300`} 
-            className="w-32 h-32 rounded-[2rem] border-4 border-emerald-500 object-cover shadow-2xl"
+            className="w-32 h-32 rounded-[2rem] border-4 border-teal-electric object-cover shadow-2xl"
           />
           <motion.div 
             initial={{ scale: 0 }}
@@ -65,13 +65,13 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
             transition={{ delay: 0.3 }}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-zinc-950 p-3 rounded-full border border-zinc-800"
           >
-            <BookOpen size={32} className="text-emerald-500" fill="currentColor" />
+            <BookOpen size={32} className="text-teal-electric" fill="currentColor" />
           </motion.div>
           <motion.img 
             initial={{ x: 50, rotate: 10 }}
             animate={{ x: 0, rotate: 5 }}
             src={partnerProfile.photoURL || `https://picsum.photos/seed/${partnerProfile.uid}/300/300`} 
-            className="w-32 h-32 rounded-[2rem] border-4 border-emerald-500 object-cover shadow-2xl"
+            className="w-32 h-32 rounded-[2rem] border-4 border-teal-electric object-cover shadow-2xl"
           />
         </div>
       </motion.div>
@@ -81,7 +81,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <h2 className="text-7xl font-black mb-4 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent italic tracking-tighter leading-tight">
+        <h2 className="text-7xl font-black mb-4 bg-gradient-to-r from-teal-electric via-cyan-400 to-teal-electric bg-clip-text text-transparent italic tracking-tighter leading-tight">
           IT'S A MATCH!
         </h2>
         
@@ -98,7 +98,7 @@ export default function MatchOverlay({ myProfile, partnerProfile, onClose }: Mat
       >
         <button 
           onClick={() => navigate('/chats')}
-          className="w-full py-5 bg-emerald-500 text-zinc-950 font-black rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-105 transition-transform active:scale-95"
+          className="w-full py-5 bg-teal-electric text-navy-deep font-black rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(0,212,255,0.3)] hover:scale-105 transition-transform active:scale-95"
         >
           <MessageSquare size={24} fill="currentColor" />
           START CHATTING
